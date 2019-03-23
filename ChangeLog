@@ -1,0 +1,87 @@
+1999-07-20  Thomas Tanner  <tanner@ffii.org>
+
+	* Makefile.am: no longer conforming to the GNU standards
+	
+1999-07-10  Thomas Tanner  <tanner@ffii.org>
+
+	* most Makefile.am's: disable autmatic dependendy tracking
+	
+1999-07-08  Thomas Tanner  <tanner@ffii.org>
+
+	* INSTALL: describe installation step and options
+	* INSTALL.GNU: new file
+	* Makefile.am: distribute INSTALL.GNU
+
+1999-07-03  Thomas Tanner  <tanner@ffii.org>
+
+	* src/Makefile.am: renamed libMesaGL to libGL
+	* src-glu/Makefile.am: renamed libMesaGLU to libGLU
+
+1999-06-23  Thomas Tanner  <tanner@ffii.org>
+
+	* configure.in: prefix shell variables with x when doing tests
+
+1999-06-16  Thomas Tanner  <tanner@ffii.org>
+
+	* Makefile.am: recursive "make exec" support
+	* configure.in: enable gcc specific debugging, profiling
+	  and optimization flags, --enable-profile, compile
+	  assembler sources when checking for cpuid, 3dnow and MMX
+	  fixed GGI checks
+	* src/FX/Makefile.am: don't compile fxspan.c
+	
+1999-06-11  Thomas Tanner  <tanner@ffii.org>
+
+	* configure.in: check for 3Dnow support
+	* fixed MMX/3Dnow support and GGI Makefiles
+	
+1999-06-10  Thomas Tanner  <tanner@ffii.org>
+
+	* Makefile: renamed to Makefile.old, inform users about the
+	  new makefile system
+	* acconfig.h: define new driver flags
+	* configure.in: generate conf.h, define driver flags in conf.h,
+	  support --without-DRIVER, fixed Glide support
+	* use conf.h where necessary
+	* demos/Makefile.am: use double buffering and run osdemo
+	* samples/Makefile.am: build rgbtoppm, create a ppm image for
+	  demos that need it, use double buffering
+	* src/X86/Makefile.am: mmx_blend.c -> mmx_blend.S
+	* src/Makefile.am, src-glu/Makefile.am: increment interface version
+	* src/GGI: compile conditionally
+	
+1999-06-07  Thomas Tanner  <tanner@ffii.org>
+
+	* src/X86/Makefile.am: some fixes for automake 1.4
+	
+1999-06-06  Thomas Tanner  <tanner@ffii.org>
+
+	* moved to experimental-1 branch
+	* configure.in: define USE_3DNOW_ASM/USE_X86_ASM
+	* src/asm_386.*: moved to src/X86/transform.*
+	* src/Makefile.am: src/3Dnow/ doesn't exist any longer, moved
+	  to src/X86/, added the new files from this branch
+	  merged 3Dnow driver into x86 driver
+	* src/X86/Makefile.am, src/FX/Makefile.am: new files added
+	* src/X86/Makefile.am: add 3Dnow, MMX support to x86 driver
+	* src/X86/mmx_blend.c: add #include's, depend on USE_MMX_ASM
+
+1999-05-29  Thomas Tanner  <tanner@ffii.org>
+
+	* created autoconf branch
+	* src/X86/Makefile.am: use srcdir
+
+1999-05-28  Thomas Tanner  <tanner@ffii.org>
+
+	* xdemos/Makefile.am: move xfont to EXTRA_PROGRAMS
+	* configure.in: define SVGA
+	* acinclude.m4: add libtool.m4
+	* configure.in: always set *_LIBS before checking for a library,
+	  values of enable-debug are on/off, check for SHM
+	* src/Makefile.am: typo fixed
+
+1999-05-25  Thomas Tanner  <tanner@ffii.org>
+
+	* Use autoconf/automake/libtool
+
+	$Revision: 1.1.1.1 $ $Date: 1999/08/19 00:55:39 $

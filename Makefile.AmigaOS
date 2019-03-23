@@ -1,0 +1,93 @@
+# Top-level makefile for Mesa
+
+# Mesa 3-D graphics library
+# Version:  3.1
+# Copyright (C) 1995-1999  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+SHELL = /bin/sh
+
+# To add a new configuration for your system add it to the list below
+# then update the Make-config file.
+
+default:
+	@echo "Type one of the following:"
+	@echo "  make amigaos              for AmigaOS with gcc and/or CyberGraphX and/or Warp3D"
+	@echo "  make amigaos-fast         for AmigaOS with gcc and/or CyberGraphX and/or Warp3D (without debugging-informations)"
+	@echo "  make amigaos-prof         for AmigaOS with gcc and/or CyberGraphX and/or Warp3D (with profiling support)"
+	@echo "  make amigaos-depend       for AmigaOS with gcc and/or CyberGraphX and/or Warp3D (build dependency)"
+	@echo "  make amigaos-lclint       for AmigaOS with gcc and/or CyberGraphX and/or Warp3D (do a lclint-check on all sources)"
+
+amigaos-fast:
+	@-mkdir -p lib
+	@-mkdir -p bin
+	if [ -d src ]            ; then cd src              ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS
+#	if [ -d src-old ]        ; then cd src-old          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+	if [ -d src-glu ]        ; then cd src-glu          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS (modified for GLu 1.3 API)
+#	if [ -d src-glu-old ]    ; then cd src-glu-old      ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1 (modified for GLu 1.2 API)
+	if [ -d src-tk.aos ]     ; then cd src-tk.aos       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLaux 1.1 (amiga)
+	if [ -d src-aux.aos ]    ; then cd src-aux.aos      ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLtk 2.1 (amiga)
+	if [ -d src-glut.aos ]   ; then cd src-glut.aos     ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLut 1.0 (amiga)
+#+	if [ -d src-gle ]        ; then cd src-gle          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+#+	if [ -d src-glmui ]      ; then cd src-glmui        ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+#+	if [ -d src-glsmap ]     ; then cd src-glsmap       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+#+	if [ -d src-gltt ]       ; then cd src-gltt         ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# gltt 1.1
+#+	if [ -d src-glui ]       ; then cd src-glui         ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glui ?.?
+#	if [ -d src-gleem ]      ; then cd src-gleem        ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# gleem ?.? (unresolved modules)
+#	if [ -d src-apprentice ] ; then cd src-apprentice   ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Apprentice ?.? unresolved
+#	if [ -d src-glx ]        ; then cd src-glx          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glx ?.? (only for looking in)
+#	if [ -d widgets-mesa ]   ; then cd widgets-mesa     ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+#	if [ -d widgets-sgi ]    ; then cd widgets-sgi      ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+
+amigaos amigaos-prof amigaos-depend amigaos-lclint:
+	@-mkdir -p lib
+	@-mkdir -p bin
+	if [ -d src ]            ; then cd src              ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS
+#	if [ -d src-old ]        ; then cd src-old          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+	if [ -d src-glu ]        ; then cd src-glu          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS (modified for GLu 1.3 API)
+#	if [ -d src-glu-old ]    ; then cd src-glu-old      ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1 (modified for GLu 1.2 API)
+	if [ -d src-tk.aos ]     ; then cd src-tk.aos       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLaux 1.1 (amiga)
+	if [ -d src-aux.aos ]    ; then cd src-aux.aos      ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLtk 2.1 (amiga)
+	if [ -d src-glut.aos ]   ; then cd src-glut.aos     ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLut 1.0 (amiga)
+#+	if [ -d src-gle ]        ; then cd src-gle          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+#+	if [ -d src-glmui ]      ; then cd src-glmui        ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+#+	if [ -d src-glsmap ]     ; then cd src-glsmap       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+#+	if [ -d src-gltt ]       ; then cd src-gltt         ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# gltt 1.1
+#+	if [ -d src-glui ]       ; then cd src-glui         ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glui ?.?
+#	if [ -d src-gleem ]      ; then cd src-gleem        ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# gleem ?.? (unresolved modules)
+#	if [ -d src-apprentice ] ; then cd src-apprentice   ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Apprentice ?.? unresolved
+#	if [ -d src-glx ]        ; then cd src-glx          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glx ?.? (only for looking in)
+#	if [ -d widgets-mesa ]   ; then cd widgets-mesa     ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+#	if [ -d widgets-sgi ]    ; then cd widgets-sgi      ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+#+	if [ -d src-dxf ]        ; then cd src-dxf          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# libdxf ?.?
+	if [ -d test ]           ; then cd test             ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# own tests and glut 3.5
+#+	if [ -d 3Dfx/demos ]     ; then cd 3Dfx/demos       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+#+	if [ -d apps ]           ; then cd apps             ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# ...
+#+	if [ -d benchmarks ]     ; then cd benchmarks       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# ..., ViewPerf, GLperf
+	if [ -d book ]           ; then cd book             ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+	if [ -d book.aux ]       ; then cd book.aux         ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 2.1
+	if [ -d demos ]          ; then cd demos            ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+#+	if [ -d examples ]       ; then cd examples         ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# ..., mostly from net
+#+	if [ -d progs ]          ; then cd progs            ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# glut 3.5
+	if [ -d samples ]        ; then cd samples          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+	if [ -d samples.tk  ]    ; then cd samples.tk       ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 2.1
+#+	if [ -d util ]           ; then cd util             ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa 3.1
+
+wos:
+	@-mkdir -p lib
+	@-mkdir -p bin
+	if [ -d src ]            ; then cd src              ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS
+	if [ -d src-glu ]        ; then cd src-glu          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	

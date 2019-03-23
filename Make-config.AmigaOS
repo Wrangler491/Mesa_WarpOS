@@ -1,0 +1,338 @@
+# Make-config
+
+MAJOR=3
+MINOR=1
+VERSION=$(MAJOR).$(MINOR)
+
+.PHONY:	amigaos% targets default clean realclean exec dep %AmigaOS
+
+## specify $(SRCS)
+
+OBJ0 = $(SRCS:.S=$(O))
+OBJ1 = $(OBJ0:.c=$(O))
+OBJ2 = $(OBJ1:.cc=$(O))
+OBJ3 = $(OBJ2:.c++=$(O))
+OBJ4 = $(OBJ3:.C=$(O))
+OBJS = $(OBJ4:.cpp=$(O))
+
+## global gcc-flags
+
+WARN = -w ##-Wall -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
+PROC = --specs=warpup -woslibs #-m68030 -m68881
+OPTI = -O2
+MORE = #-fgcse -fregmove -fno-float-store -fno-function-cse -fpeephole	\
+	#-ffast-math -fomit-frame-pointer -fstrength-reduce		\
+	#-frerun-cse-after-loop -frerun-loop-opt -fschedule-insns	\
+	#-fschedule-insns2 -fmove-all-movables -freg-struct-return	\
+	#-freduce-all-givs -fexpensive-optimizations -mbitfield
+
+## specify $(LIB_DIR)/$(LIB_DEP)
+
+LIB_LINK = -L$(LIB_DIR) $(subst .a.static,,$(subst $(LIB_DIR)/lib,-l,$(LIB_DEP)))
+
+##### TARGETS #####
+## specify $(DIRS)/$(MAKEFILE)
+
+default:
+	@echo "Specify a target configuration"
+
+clean:
+	-rm $(OBJS) *~ 
+	@for dirs in $(DIRS) -dmmy-; do			\
+	  if [ -d $$dirs ]; then			\
+	    (cd $$dirs;					\
+	     $(MAKE) -f $(MAKEFILE) $@ -$(MAKEFLAGS) );	\
+	  else true; fi;				\
+	done
+
+realclean: clean
+	-rm $(PRGS)
+	@for dirs in $(DIRS) -dmmy-; do			\
+	  if [ -d $$dirs ]; then			\
+	    (cd $$dirs;					\
+	     $(MAKE) -f $(MAKEFILE) $@ -$(MAKEFLAGS) );	\
+	  else true; fi;				\
+	done
+
+## build recursive targets
+## specify $(DIRS)
+targets: $(LIB_DEP) $(PRGS)
+	@for dirs in $(DIRS) -dmmy-; do			\
+	  if [ -d $$dirs ]; then			\
+	    (cd $$dirs;					\
+	     $(MAKE) -f $(MAKEFILE) $@ -$(MAKEFLAGS) );	\
+	  else true; fi;				\
+	done
+
+## execute all programs
+## specify $(PRGS)
+exec: $(PRGS)
+	@for prgs in $(PRGS) -dmmy-; do			\
+	  if [ -f $$prgs ]; then			\
+	    (echo -n "Running $$prgs ..." ;		\
+	     echo $$prgs ;				\
+	     echo ) ;					\
+	  else true; fi;				\
+	done
+
+## specify $(SRCS)/$(CFLAGS)
+dep: $(SRCS)
+	@makedepend -fdepend -Y -I$(INC_DIR) -I. -- $(CFLAGS) -- $^
+	@for dirs in $(DIRS) -dmmy-; do			\
+	  if [ -d $$dirs ]; then			\
+	    (cd $$dirs;					\
+	     $(MAKE) -f $(MAKEFILE) $@ -$(MAKEFLAGS) );	\
+	  else true; fi;				\
+	done
+
+## all unknown targets
+## specify $(DIRS)
+#%:
+#	@for dirs in $(DIRS) -dmmy-; do			\
+#	  if [ -d $$dirs ]; then			\
+#	    (cd $$dirs;					\
+#	     $(MAKE) -f $(MAKEFILE) $@ -$(MAKEFLAGS) );	\
+#	  else true; fi;				\
+#	done
+
+##### RULES #####
+
+.SUFFIXES:
+.SUFFIXES: .c .cc .cpp .h $(O) .l .y .c++
+
+## shared
+#%.o: %.c
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#%.o: %.cc
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#%.o: %.cpp
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+## static
+#%_s.o: %.c
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#%_s.o: %.cc
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#%_s.o: %.cpp
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+## profiled
+#%_p.o: %.c
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#%_p.o: %.cc
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#%_p.o: %.cpp
+#	$(CC) -c -I. -I$(INCDIR) $(CFLAGS) $< -o $@
+#
+## simple executables
+## specify $(LIB_DEP)
+
+PRG_DEP = $(LIB_DEP)
+#PRG_DEP = 
+
+## dependency
+depend: $(SRCS)
+	touch depend
+
+## dependency import
+include depend
+
+# Mesa 3-D graphics library
+# Copyright (C) 1995-1998  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# The following variables are passed to each Makefile:
+#
+# GL_LIB      the name of the Mesa "GL" library file (usually libMesaGL.a)
+# GLU_LIB     the name of the Mesa "GLU" library file (usually libMesaGLU.a)
+# GLUT_LIB    the name of the GLUT library file (usually libglut.a)
+# CC          the C compiler (usually cc or gcc)
+# CFLAGS      flags to C compiler (usually -O)
+# MAKELIB     the script or command to make a library file
+# XLIBS       libraries needed to link X apps (at least -lX11)
+#
+# Optionally, you can add definitions for the INCDIR and LIBDIR variables
+# which specify where to find the Mesa include files and where to put the
+# Mesa libraries.  The defaults are ../include and ../lib.  This use of
+# overriding makefile macros on the command line should work with most
+# variants of make.
+#
+# To enable profiling add -DPROFILE to the CFLAGS line.  Be sure to set the
+# MESA_PROFILE environment variable to enable printing of the profile report.
+#
+# If your system supports the X Shared Memory extension add -DSHM to the
+# CFLAGS line and add -lXext to the XLIBS line.
+#
+# Some compilers complain about const parameters.  Adding -DNO_CONST to the
+# CFLAGS line should silence suth warnings.
+#
+#
+# To add a new system configuration just follow the examples below and update
+# the top-level Makefile.
+
+wos:
+	$(MAKE) -f Makefile.AmigaOS targets		\
+	"GL_LIB = libMesaGL.a"				\
+	"GLU_LIB = libMesaGLu.a"			\
+	"CC = gcc"					\
+	"CXX = g++"					\
+	"CFLAGS = $(OPTI) $(PROC) $(WARN) $(MORE)"	\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS"		\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS ="				\
+	"O = .o"					\
+	-$(MAKEFLAGS)
+
+
+amigaos:
+	$(MAKE) -f Makefile.AmigaOS targets		\
+	"GL_LIB = libMesaGL.a"				\
+	"GLU_LIB = libMesaGLu.a"			\
+	"GLUT_LIB = libMesaGLut.a"			\
+	"GLSMAP_LIB = libMesaGLsmap.a"			\
+	"GLE_LIB = libMesaGLe.a"			\
+	"GLEEM_LIB = libMesaGLeem.a"			\
+	"GLMUI_LIB = libMesaGLmui.a"			\
+	"GLUI_LIB = libMesaGLui.a"			\
+	"GLTT_LIB = libMesaGLtt.a"			\
+	"TK_LIB = libMesaGLtk.a"			\
+	"AUX_LIB = libMesaGLaux.a"			\
+	"APP_LIB = libMesaGLapprentice.a"		\
+	"DXF_LIB = libdxf.a"				\
+	"CC = gcc"					\
+	"CXX = g++"					\
+	"CFLAGS = $(OPTI) $(PROC) $(WARN) $(MORE)"	\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS"		\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS = -lamiga"				\
+	"O = .o"					\
+	-$(MAKEFLAGS)
+
+amigaos-fast:
+	$(MAKE) -f Makefile.AmigaOS targets		\
+	"GL_LIB = libMesaGL_f.a"			\
+	"GLU_LIB = libMesaGLu_f.a"			\
+	"GLUT_LIB = libMesaGLut_f.a"			\
+	"GLSMAP_LIB = libMesaGLsmap_f.a"		\
+	"GLE_LIB = libMesaGLe_f.a"			\
+	"GLEEM_LIB = libMesaGLeem_f.a"			\
+	"GLMUI_LIB = libMesaGLmui_f.a"			\
+	"GLUI_LIB = libMesaGLui_f.a"			\
+	"GLTT_LIB = libMesaGLtt_f.a"			\
+	"TK_LIB = libMesaGLtk_f.a"			\
+	"AUX_LIB = libMesaGLaux_f.a"			\
+	"APP_LIB = libMesaGLapprentice.a"		\
+	"DXF_LIB = libdxf.a"				\
+	"CC = gcc"					\
+	"CXX = g++"					\
+	"CFLAGS = $(OPTI) $(PROC) $(WARN) $(MORE)"	\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS"		\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS = -lamiga"				\
+	"O = _f.o"					\
+	-$(MAKEFLAGS)
+
+amigaos-depend:
+	$(MAKE) -f Makefile.AmigaOS dep			\
+	"GL_LIB = libMesaGL.a"				\
+	"GLU_LIB = libMesaGLu.a"			\
+	"GLUT_LIB = libMesaGLut.a"			\
+	"GLSMAP_LIB = libMesaGLsmap.a"			\
+	"GLE_LIB = libMesaGLe.a"			\
+	"GLEEM_LIB = libMesaGLeem.a"			\
+	"GLMUI_LIB = libMesaGLmui.a"			\
+	"GLUI_LIB = libMesaGLui.a"			\
+	"GLTT_LIB = libMesaGLtt.a"			\
+	"TK_LIB = libMesaGLtk.a"			\
+	"AUX_LIB = libMesaGLaux.a"			\
+	"APP_LIB = libMesaGLapprentice.a"		\
+	"DXF_LIB = libdxf.a"				\
+	"CC = gcc"					\
+	"CXX = g++"					\
+	"CFLAGS = -Damigaos -DAMIGA -DTRYTEST" 		\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS"		\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS = -lamiga"				\
+	"O = .o"					\
+	-$(MAKEFLAGS)
+
+amigaos-lclint:
+	$(MAKE) -ki -f Makefile.AmigaOS targets		\
+	"GL_LIB = libMesaGL.a"				\
+	"GLU_LIB = libMesaGLu.a"			\
+	"GLUT_LIB = libMesaGLut.a"			\
+	"GLSMAP_LIB = libMesaGLsmap.a"			\
+	"GLE_LIB = libMesaGLe.a"			\
+	"GLEEM_LIB = libMesaGLeem.a"			\
+	"GLMUI_LIB = libMesaGLmui.a"			\
+	"GLUI_LIB = libMesaGLui.a"			\
+	"GLTT_LIB = libMesaGLtt.a"			\
+	"TK_LIB = libMesaGLtk.a"			\
+	"AUX_LIB = libMesaGLaux.a"			\
+	"APP_LIB = libMesaGLapprentice.a"		\
+	"DXF_LIB = libdxf.a"				\
+	"CC = lclint"					\
+	"CXX = lclint"					\
+	"CFLAGS = -I/INCC"				\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS-lclint"	\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS = -lamiga"				\
+	"O = .o"					\
+	-$(MAKEFLAGS)
+
+amigaos-static:
+	$(MAKE) -f Makefile.AmigaOS targets		\
+	"GL_LIB = libMesaGL.a"				\
+	"GLE_LIB = libMesaGLe.a"			\
+	"GLEEM_LIB = libMesaGLeem.a"			\
+	"GLMUI_LIB = libMesaGLmui.a"			\
+	"GLSMAP_LIB = libMesaGLsmap.a"			\
+	"GLU_LIB = libMesaGLu.a"			\
+	"GLUI_LIB = libMesaGLui.a"			\
+	"GLUT_LIB = libMesaGLut.a"			\
+	"GLTT_LIB = libMesaGLtt.a"			\
+	"APP_LIB = libMesaGLapprentice.a"		\
+	"TK_LIB = libMesaGLtk.a"			\
+	"AUX_LIB = libMesaGLaux.a"			\
+	"DXF_LIB = libdxf.a"				\
+	"CC = gcc"					\
+	"CXX = g++"					\
+	"CFLAGS = $(OPTI) $(PROC) $(WARN) $(MORE)"	\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS"		\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS = -lamiga"				\
+	"O = _s.o"					\
+	-$(MAKEFLAGS)
+
+amigaos-prof:
+	$(MAKE) -f Makefile.AmigaOS targets		\
+	"GL_LIB = libMesaGL_p.a"			\
+	"GLU_LIB = libMesaGLu_p.a"			\
+	"GLUT_LIB = libMesaGLut_p.a"			\
+	"GLSMAP_LIB = libMesaGLsmap_p.a"		\
+	"GLE_LIB = libMesaGLe_p.a"			\
+	"GLMUI_LIB = libMesaGLmui_p.a"			\
+	"GLUI_LIB = libMesaGLui_p.a"			\
+	"TK_LIB = libMesaGLtk_p.a"			\
+	"AUX_LIB = libMesaGLaux_p.a"			\
+	"APP_LIB = libMesaGLapprentice.a"		\
+	"DXF_LIB = libdxf.a"				\
+	"CC = gcc"					\
+	"CXX = g++"					\
+	"CFLAGS = -pg $(PROC) $(WARN) -DPROFILE"	\
+	"MAKELIB = $(ROOT)/bin/mklib.AmigaOS-prof"	\
+	"MAKEFILE = Makefile.AmigaOS"			\
+	"XLIBS = -lamiga"				\
+	"O = _p.o"					\
+	-$(MAKEFLAGS)

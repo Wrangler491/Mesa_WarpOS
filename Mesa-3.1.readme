@@ -1,0 +1,40 @@
+Short:    Mesa 3.1 (src+binary 68030+68881)
+Uploader: Niels.Froehling@Informatik.Uni-Oldenburg.DE (Niels Froehling)
+Author:   Brian Paul [ported to MesaGL: Niels.Froehling@Informatik.Uni-Oldenburg.DE (Niels Froehling)]
+Type:     util/libs
+Requires: ixemul
+
+ This is Mesa 3.1.  This port supports 8/15/16/24bit displays on public
+screens under CyberGraphX (respective Picasso96), AGA, or any other
+graphics driver for 8bit.
+ In addition I've merged the Warp3D StormMesa-portions into the source.  I
+can't guarantee that they work as the internal sub-driver has been changed
+and I do not own a 3D-card to verify it.
+
+ There are some Variables you might set:
+
+ "Set MESA_DEBUG ON/OFF <number>"
+ OFF disables output of information, ON enables it.  The number ranges from
+0 (OFF) to 9.  The higher the number the more output:
+  1 - names of functions at function-entry
+  2 - status/modus-texts
+  5 - detailed results of some functions
+  8 - names of all called system-functions out of loops
+  9 - names of all called system-functions in loops
+
+ "Set MESA_PALETTEMODE COLOR/COLORSHIFT/GREY/WEIGHTED"
+ WEIGHTED uses the original 189 colors for matching.
+ COLORSHIFT enables 255 color palette instead of 189, and enables fast
+colormatching (with shifts).
+ COLOR disables shift-match, but gives better quality.  (For example, the
+shift-match does not know white, but a bright blue)
+ GREY enables 64 grey-levels
+
+ "Set MESA_PENCACHE ON/OFF"
+ OFF disables caching of matches, ON enables it.  This is only valid for
+non-shift matches.  With this you could speed up the drawing between 1 and
+nearly infinite times (it does not slow down the matching times).
+
+ "Set MESA_PENDITHER ON/OFF"
+ OFF disables dithering, ON enables it.  This is only valid for
+non-shift matches.  With this you could improve the quality of drawing.

@@ -1,0 +1,8 @@
+
+Implementation of Mesa 3.1 for WarpOS
+
+Compile for WarpOS with make -fmakefile.amigaos wos
+
+~~~~~~~~~~~~~~~~~~~~~
+
+Please look in the docs/ directory for the README file and other documentation.

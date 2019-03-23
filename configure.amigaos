@@ -1,0 +1,30 @@
+dnl ------------------------------------------
+dnl AmigaOS driver
+have_amigaos=auto
+AMIGAOS_CFLAGS=""
+AMIGAOS_LIBS=""
+AC_ARG_WITH(amigaos,
+[  --with-amigaos         enable AmigaOS], have_amigaos="$withval")
+if test "x$amigaos" != xno; then
+  if test "x$amigaos" != xauto; then
+    AMIGAOS_CFLAGS="-I/ade/m68k-amigaos/include -O2 -m68020-60 -m68881"
+    AMIGAOS_LIBS="-L/ade/m68k-amigaos/lib -lamiga"
+  fi
+  save_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS $AMIGAOS_CFLAGS"
+  AC_CHECK_HEADER(clib/exec_protos.h, have_amigaos=yes)
+  CPPFLAGS="$save_CPPFLAGS"
+  if test "x$have_amigaos" = xyes; then
+    save_LIBS="$LIBS"
+    LIBS="$LIBS $AMIGAOS_LIBS"
+    AC_CHECK_LIB(amiga, AllocPooled, AMIGAOS_LIBS="$AMIGAOS_LIBS -lamiga"
+	AC_DEFINE(AMIGAOS) have_amigaos=yes, have_amigaos=no)
+    LIBS="$save_LIBS"
+  fi
+  if test "x$have_amigaos" != xyes; then
+    AMIGAOS_CFLAGS="" AMIGAOS_LIBS=""
+  fi
+fi
+AC_SUBST(AMIGAOS_CFLAGS)
+AC_SUBST(AMIGAOS_LIBS)
+

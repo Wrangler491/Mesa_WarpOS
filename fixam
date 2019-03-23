@@ -1,0 +1,51 @@
+#! /bin/sh
+
+# (c) Copyright 1999, Thomas Tanner <tanner@ffii.org>
+# Disables/enables automake's automatic dependency tracking
+# since automake 1.4 doesn't support this feature on non-GNU systems.
+# Developers using a non-GNU system (no GNU make and GCC installed)
+# must execute
+#	fixam
+# before running bootstrap and
+#	fixam -r
+# before doing a CVS checkin.
+# Normally, on GNU systems (both GCC and GNU make installed) 
+# this script has no effect. However, you can let it assume
+# a non-GNU system using the -f argument.
+
+undo=no
+force=no
+while test $# -gt 0
+do
+  arg="$1"
+  shift
+  case "$arg" in
+  -f) force=yes ;;
+  -r) undo=yes ;;
+  esac
+done
+
+if test $force = no && (cc -v 2>&1 | grep gcc > /dev/null) &&
+   (make -v 2>&1 | grep GNU > /dev/null); then 
+  # GCC and GNU make installed
+  echo "nothing to do."
+  exit 0
+fi
+
+  files=`find -name "Makefile.am"`
+  for file in $files; do
+    if grep "AUTOMAKE_OPTIONS = no-dependencies" $file > /dev/null; then
+      echo "fixing $file"
+    if test $undo = no; then
+      # uncomment it -> disable automatic dependency tracking
+        sed -e "s/^\#AUTOMAKE_OPTIONS/AUTOMAKE_OPTIONS/g" $file > $file.tmp
+      else
+      # comment it out -> enable automatic dependency tracking
+        sed -e "s/^AUTOMAKE_OPTIONS/\#AUTOMAKE_OPTIONS/g" $file > $file.tmp
+      fi
+      mv -f $file.tmp $file
+    fi
+  done
+echo "done."
+
+exit 0

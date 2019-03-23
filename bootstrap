@@ -1,0 +1,13 @@
+#! /bin/sh
+
+# helps bootstrapping Mesa, when checked out from CVS
+# requires GNU autoconf and GNU automake
+# this is not meant to go into the distributions
+
+test -f ltmain.sh || libtoolize -c -f
+aclocal -I .
+autoheader
+automake -a -c
+autoconf
+
+exit 0
