@@ -1,0 +1,8 @@
+#define NAME MesaGL
+#define FILENAME MesaGL_f
+#define LIBRARY_ID 50
+#define VERSION 3
+#define REVISION 1
+#define CONSTRUCTOR glConstructor()
+#define DESTRUCTOR glDestructor()
+#define INTERNALS _CyberGfxBase _DOSBase _GfxBase _IntuitionBase _UtilityBase _amesaPool _CC _LastError _preset _malloc _calloc _free _debugOutput

@@ -1,0 +1,459 @@
+# $Id: Makefile,v 3.3 1998/06/10 02:52:20 brianp Exp $
+
+# Mesa 3-D graphics library
+# Version:  3.0
+# Copyright (C) 1995-1998  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Makefile for GLUT-based demo programs for Unix/X11
+
+# $Log: Makefile,v $
+# Revision 3.3  1998/06/10 02:52:20  brianp
+# added multiext example
+#
+# Revision 3.2  1998/04/21 23:58:41  brianp
+# added LIBDIR variable
+#
+# Revision 3.1  1998/02/21 01:31:56  brianp
+# added multitex and renormal demos
+#
+# Revision 3.0  1998/02/14 18:30:39  brianp
+# initial rev
+#
+
+ROOT = ..
+
+##### MACROS #####
+
+## include-directory (replace by ${srcdir}/include later)
+INC_DIR = $(ROOT)/include
+
+## lib-directory (replace by ${srcdir}/lib later)
+LIB_DIR = $(ROOT)/lib
+
+## library dependencies
+LIB_DEP = $(LIB_DIR)/$(GLMUI_LIB).static	\
+	$(LIB_DIR)/$(GLSMAP_LIB).static	\
+	$(LIB_DIR)/$(GLE_LIB).static	\
+	$(LIB_DIR)/$(GLUT_LIB).static	\
+	$(LIB_DIR)/$(GLU_LIB).static	\
+	$(LIB_DIR)/$(AUX_LIB).static	\
+	$(LIB_DIR)/$(TK_LIB).static	\
+	$(LIB_DIR)/$(GL_LIB).static
+
+## no libraries to build
+LIBS = 
+
+## no dirs to recurse
+DIRS =
+
+## sources to process
+SRCS = start.in					\
+	parseversion.in				\
+	createheader.in				\
+	genglue.in				\
+	start/start_gl.S			\
+	start/start_glu.S			\
+	start/start_gltk.S			\
+	start/start_glaux.S			\
+	start/start_glut.S			\
+	start/start_glsmap.S			\
+	start/start_gle.S			\
+	start/start_glmui.S			\
+
+## programs to create/create
+PRGS =	start/start_gl.o			\
+	start/start_glu.o			\
+	start/start_gltk.o			\
+	start/start_glaux.o			\
+	start/start_glut.o			\
+	start/start_glsmap.o			\
+	start/start_gle.o			\
+	start/start_glmui.o			\
+	lib/libMesaGL.a				\
+	lib/libMesaGLu.a			\
+	lib/libMesaGLtk.a			\
+	lib/libMesaGLaux.a			\
+	lib/libMesaGLut.a			\
+	lib/libMesaGLsmap.a			\
+	lib/libMesaGLe.a			\
+	lib/libMesaGLmui.a			\
+	lib/libb/libMesaGL.a			\
+	lib/libb/libMesaGLu.a			\
+	lib/libb/libMesaGLtk.a			\
+	lib/libb/libMesaGLaux.a			\
+	lib/libb/libMesaGLut.a			\
+	lib/libb/libMesaGLsmap.a		\
+	lib/libb/libMesaGLe.a			\
+	lib/libb/libMesaGLmui.a			\
+	lib/libb32/libm020/libMesaGL.a		\
+	lib/libb32/libm020/libMesaGLu.a		\
+	lib/libb32/libm020/libMesaGLtk.a	\
+	lib/libb32/libm020/libMesaGLaux.a	\
+	lib/libb32/libm020/libMesaGLut.a	\
+	lib/libb32/libm020/libMesaGLsmap.a	\
+	lib/libb32/libm020/libMesaGLe.a		\
+	lib/libb32/libm020/libMesaGLmui.a	\
+	lib/libMesaGL_p.a			\
+	lib/libMesaGLu_p.a			\
+	lib/libMesaGLtk_p.a			\
+	lib/libMesaGLaux_p.a			\
+	lib/libMesaGLut_p.a			\
+	lib/libMesaGLsmap_p.a			\
+	lib/libMesaGLe_p.a			\
+	lib/libMesaGLmui_p.a
+
+# MASTER-CONFIG #
+
+include $(ROOT)/Make-config.AmigaOS
+
+##### RULES #####
+
+gen/genglue_gl.c: genglue.in include/GL/gl_calls.def
+	sed -e 's/@TARGET@//g' <$< >$@
+gen/genglue_glu.c: genglue.in include/GL/glu_calls.def
+	sed -e 's/@TARGET@/u/g' <$< >$@
+gen/genglue_glut.c: genglue.in include/GL/glut_calls.def
+	sed -e 's/@TARGET@/ut/g' <$< >$@
+gen/genglue_glsmap.c: genglue.in include/GL/glsmap_calls.def
+	sed -e 's/@TARGET@/smap/g' <$< >$@
+gen/genglue_glaux.c: genglue.in include/GL/glaux_calls.def
+	sed -e 's/@TARGET@/aux/g' <$< >$@
+gen/genglue_glmui.c: genglue.in include/GL/glmui_calls.def
+	sed -e 's/@TARGET@/mui/g' <$< >$@
+gen/genglue_gltk.c: genglue.in include/GL/gltk_calls.def
+	sed -e 's/@TARGET@/tk/g' <$< >$@
+gen/genglue_gle.c: genglue.in include/GL/gle_calls.def
+	sed -e 's/@TARGET@/e/g' <$< >$@
+
+parse/parseversion_gl.c: parseversion.in
+	sed -e 's/@TARGET@//g' <$< >$@
+parse/parseversion_glu.c: parseversion.in
+	sed -e 's/@TARGET@/u/g' <$< >$@
+parse/parseversion_glut.c: parseversion.in
+	sed -e 's/@TARGET@/ut/g' <$< >$@
+parse/parseversion_glsmap.c: parseversion.in
+	sed -e 's/@TARGET@/smap/g' <$< >$@
+parse/parseversion_glaux.c: parseversion.in
+	sed -e 's/@TARGET@/aux/g' <$< >$@
+parse/parseversion_glmui.c: parseversion.in
+	sed -e 's/@TARGET@/mui/g' <$< >$@
+parse/parseversion_gltk.c: parseversion.in
+	sed -e 's/@TARGET@/tk/g' <$< >$@
+parse/parseversion_gle.c: parseversion.in
+	sed -e 's/@TARGET@/e/g' <$< >$@
+
+create/createheader_gl.c: createheader.in include/library_gl.h
+	sed -e 's/@TARGET@//g' <$< >$@
+create/createheader_glu.c: createheader.in include/library_glu.h
+	sed -e 's/@TARGET@/u/g' <$< >$@
+create/createheader_glut.c: createheader.in include/library_glut.h
+	sed -e 's/@TARGET@/ut/g' <$< >$@
+create/createheader_glsmap.c: createheader.in include/library_glsmap.h
+	sed -e 's/@TARGET@/smap/g' <$< >$@
+create/createheader_glaux.c: createheader.in include/library_glaux.h
+	sed -e 's/@TARGET@/aux/g' <$< >$@
+create/createheader_glmui.c: createheader.in include/library_glmui.h
+	sed -e 's/@TARGET@/mui/g' <$< >$@
+create/createheader_gltk.c: createheader.in include/library_gltk.h
+	sed -e 's/@TARGET@/tk/g' <$< >$@
+create/createheader_gle.c: createheader.in include/library_gle.h
+	sed -e 's/@TARGET@/e/g' <$< >$@
+
+start/start_gl.S: start.in
+	sed -e 's/@TARGET@//g' <$< >$@
+start/start_glu.S: start.in
+	sed -e 's/@TARGET@/u/g' <$< >$@
+start/start_glut.S: start.in
+	sed -e 's/@TARGET@/ut/g' <$< >$@
+start/start_glsmap.S: start.in
+	sed -e 's/@TARGET@/smap/g' <$< >$@
+start/start_glaux.S: start.in
+	sed -e 's/@TARGET@/aux/g' <$< >$@
+start/start_glmui.S: start.in
+	sed -e 's/@TARGET@/mui/g' <$< >$@
+start/start_gltk.S: start.in
+	sed -e 's/@TARGET@/tk/g' <$< >$@
+start/start_gle.S: start.in
+	sed -e 's/@TARGET@/e/g' <$< >$@
+
+%$(O): %.c
+	$(CC) -I$(INC_DIR) $(CFLAGS) $< -s -c -o $@
+%$(O): %.S
+	$(CC) -I$(INC_DIR) $(CFLAGS) $< -s -c -o $@
+
+gen/genglue_gl: gen/genglue_gl.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_glu: gen/genglue_glu.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_gltk: gen/genglue_gltk.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_glaux: gen/genglue_glaux.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_glut: gen/genglue_glut.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_glsmap: gen/genglue_glsmap.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_gle: gen/genglue_gle.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+gen/genglue_glmui: gen/genglue_glmui.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+
+parse/parseversion_gl: parse/parseversion_gl.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_glu: parse/parseversion_glu.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_gltk: parse/parseversion_gltk.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_glaux: parse/parseversion_glaux.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_glut: parse/parseversion_glut.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_glsmap: parse/parseversion_glsmap.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_gle: parse/parseversion_gle.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+parse/parseversion_glmui: parse/parseversion_glmui.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+
+create/createheader_gl: create/createheader_gl.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_glu: create/createheader_glu.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_gltk: create/createheader_gltk.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_glaux: create/createheader_glaux.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_glut: create/createheader_glut.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_glsmap: create/createheader_glsmap.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_gle: create/createheader_gle.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+create/createheader_glmui: create/createheader_glmui.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+
+start/start_gl: start/start_gl.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_glu: start/start_glu.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_gltk: start/start_gltk.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_glaux: start/start_glaux.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_glut: start/start_glut.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_glsmap: start/start_glsmap.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_gle: start/start_gle.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+start/start_glmui: start/start_glmui.o $(LIB_DEP)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $(filter-out %.static,$^) -o $@ -s
+
+start/start_gl.h: create/createheader_gl
+	$< >$@
+start/start_glu.h: create/createheader_glu
+	$< >$@
+start/start_gltk.h: create/createheader_gltk
+	$< >$@
+start/start_glaux.h: create/createheader_glaux
+	$< >$@
+start/start_glut.h: create/createheader_glut
+	$< >$@
+start/start_glsmap.h: create/createheader_glsmap
+	$< >$@
+start/start_gle.h: create/createheader_gle
+	$< >$@
+start/start_glmui.h: create/createheader_glmui
+	$< >$@
+
+include/version_gl.h: parse/parseversion_gl
+	$< 3 1 >$@
+include/version_glu.h: parse/parseversion_glu
+	$< 1 10 >$@
+include/version_gltk.h: parse/parseversion_gltk
+	$< 1 1 >$@
+include/version_glaux.h: parse/parseversion_glaux
+	$< 3 1 >$@
+include/version_glut.h: parse/parseversion_glut
+	$< 3 7 >$@
+include/version_glsmap.h: parse/parseversion_glsmap
+	$< 1 10 >$@
+include/version_gle.h: parse/parseversion_gle
+	$< 1 10 >$@
+include/version_glmui.h: parse/parseversion_glmui
+	$< 1 10 >$@
+
+lib/libMesaGL.a: gen/genglue_gl
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLu.a: gen/genglue_glu
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLtk.a: gen/genglue_gltk
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLaux.a: gen/genglue_glaux
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLut.a: gen/genglue_glut
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLsmap.a: gen/genglue_glsmap
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLe.a: gen/genglue_gle
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLmui.a: gen/genglue_glmui
+	rm -f *.o
+	$< no-baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGL.a: gen/genglue_gl
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLu.a: gen/genglue_glu
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLtk.a: gen/genglue_gltk
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLaux.a: gen/genglue_glaux
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLut.a: gen/genglue_glut
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLsmap.a: gen/genglue_glsmap
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLe.a: gen/genglue_gle
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb/libMesaGLmui.a: gen/genglue_glmui
+	rm -f *.o
+	$< baserel
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGL.a: gen/genglue_gl
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLu.a: gen/genglue_glu
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLtk.a: gen/genglue_gltk
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLaux.a: gen/genglue_glaux
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLut.a: gen/genglue_glut
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLsmap.a: gen/genglue_glsmap
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLe.a: gen/genglue_gle
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libb32/libm020/libMesaGLmui.a: gen/genglue_glmui
+	rm -f *.o
+	$< baserel32
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGL_p.a: gen/genglue_gl
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLu_p.a: gen/genglue_glu
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLtk_p.a: gen/genglue_gltk
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLaux_p.a: gen/genglue_glaux
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLut_p.a: gen/genglue_glut
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLsmap_p.a: gen/genglue_glsmap
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLe_p.a: gen/genglue_gle
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o
+lib/libMesaGLmui_p.a: gen/genglue_glmui
+	rm -f *.o
+	$< profiling
+	/ade/m68k-amigaos/bin/ar r $@ *.o
+	rm -f *.o

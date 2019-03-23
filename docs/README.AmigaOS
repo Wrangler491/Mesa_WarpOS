@@ -1,0 +1,13 @@
+ This is Mesa 3.1.  This port supports 1-8/15/16/24/32bit displays on
+public/private screens under CyberGraphX (respective Picasso96), AGA, or
+any other graphics driver for 1-8bit.
+
+ user-documentation:
+  read src/AOS/OPTIONS for environment-variables
+
+ developer-ducumentation:
+  read src/AOS/CHANGES for changes
+  read src/AOS/NOTES for some notes what could be done better
+  read src/AOS/PLANS for future formats/modes/enhancements
+  read src/AOS/TODO for what I really want to do in the next time
+  read src/AOS/USAGE for using the API of amigaMesa
