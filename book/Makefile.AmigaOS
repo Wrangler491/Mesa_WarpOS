@@ -1,0 +1,89 @@
+# $Id: Makefile,v 3.3 1998/06/10 02:52:20 brianp Exp $
+
+# Mesa 3-D graphics library
+# Version:  3.0
+# Copyright (C) 1995-1998  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Makefile for GLUT-based demo programs for Unix/X11
+
+# $Log: Makefile,v $
+# Revision 3.3  1998/06/10 02:52:20  brianp
+# added multiext example
+#
+# Revision 3.2  1998/04/21 23:58:41  brianp
+# added LIBDIR variable
+#
+# Revision 3.1  1998/02/21 01:31:56  brianp
+# added multitex and renormal demos
+#
+# Revision 3.0  1998/02/14 18:30:39  brianp
+# initial rev
+#
+
+ROOT = ..
+
+##### MACROS #####
+
+## include-directory (replace by ${srcdir}/include later)
+INC_DIR = $(ROOT)/include
+
+## lib-directory (replace by ${srcdir}/lib later)
+LIB_DIR = $(ROOT)/lib
+
+## library dependencies
+LIB_DEP = $(LIB_DIR)/$(GLUT_LIB).static	\
+	$(LIB_DIR)/$(GLU_LIB).static	\
+	$(LIB_DIR)/$(GL_LIB).static
+
+## no libraries to build
+LIBS = 
+
+## no dirs to recurse
+DIRS = 
+
+## sources to process
+SRCS = aaindex.c aapoly.c aargb.c accanti.c accpersp.c alpha.c alpha3D.c \
+        anti.c bezcurve.c bezmesh.c checker.c \
+        clip.c colormat.c cube.c depthcue.c dof.c double.c drawf.c feedback.c fog.c \
+        fogindex.c font.c hello.c image.c light.c lines.c list.c material.c mipmap.c model.c \
+        movelight.c nurbs.c pickdepth.c picksquare.c plane.c planet.c polyoff.c polys.c quadric.c \
+        robot.c sccolorlight.c scene.c scenebamb.c sceneflat.c select.c smooth.c stencil.c \
+        stroke.c surface.c teaambient.c teapots.c tess.c tesswind.c texbind.c texgen.c texprox.c \
+        texsub.c texturesurf.c torus.c trim.c unproject.c varray.c wrap.c
+# xfont.c is X11
+
+## programs to create
+PRGS = aaindex aapoly aargb accanti accpersp alpha alpha3D anti \
+        bezcurve bezmesh checker clip colormat cube depthcue \
+        dof double drawf feedback fog fogindex font hello image light lines list material \
+        mipmap model movelight nurbs pickdepth picksquare plane planet polyoff polys quadric \
+        robot sccolorlight scene scenebamb sceneflat select smooth stencil stroke surface teaambient \
+        teapots tess tesswind texbind texgen texprox texsub texturesurf torus trim unproject \
+        varray wrap
+# xfont is X11
+
+# MASTER-CONFIG #
+
+include $(ROOT)/Make-config.AmigaOS
+
+##### RULES #####
+
+## implicit rule to make object-files
+%$(O): %.c
+	$(CC) -I$(INC_DIR) $(CFLAGS) $< -s -c -o $@
+%: %$(O) $(PRG_DEP)
+	$(CC) -I. -I$(INC_DIR) $(CFLAGS) $< $(LIB_LINK) -s -o $@
