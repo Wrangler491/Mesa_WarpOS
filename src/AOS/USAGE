@@ -1,0 +1,578 @@
+/*
+ * Example usage:
+ * 
+ * 1. Make a window using Intuition calls
+ * 
+ * 2. Call AMesaCreateContext() to make a rendering context and attach it
+ * to the window made in step 1.
+ * 
+ * 3. Call AMesaMakeCurrent() to make the context the active one.
+ * 
+ * 4. Make gl* calls to render your graphics.
+ * 
+ * 5. When exiting, call AMesaDestroyContext().
+ * 
+ */
+
+/**********************************************************************/
+/*****              amigaMesa structures [private]                *****/
+/**********************************************************************/
+
+/**********************************************************************/
+/*****               amigaMesa functions [private]                *****/
+/**********************************************************************/
+
+/**********************************************************************/
+/*****            amigaMesa dependency-defines [private]          *****/
+/**********************************************************************/
+
+  /* prevent assertations */
+#define	NDEBUG
+  /* prevent any kind of debuging-output */
+#define	NODEBUG
+  /* profile Mesa */
+#define	PROFILE
+  /* prevent LUTs for calculation and use direct arithmetic */
+#define	PREVENT_LUT
+  /* do not pass library-bases over contexts */
+#define	NO_CONTEXT_LIBRARIES
+  /* do not use the library-bases contained in contexts */
+#define	NO_CONTEXT_AVAILABLE
+  /* replace malloc/calloc/free with pool-functions (only in libMesaGL) */
+#define	REPLACE_ALLOC
+
+  /* this code depends on kernel-informations */
+#define	AOS_KERNEL
+  /* this code should include Warp3D-support */
+#define	AOS_WARP3D
+
+/**********************************************************************/
+/*****             amigaMesa function-defines [private]           *****/
+/**********************************************************************/
+
+  /* set a flag */
+#define	SetF(field, flag)
+  /* clear a flag */
+#define	ClrF(field, flag)
+  /* swap a flag */
+#define	SwpF(field, flag)
+  /* test a flag */
+#define	TstF(field, flag)
+  /* convert a flag to a boolean */
+#define	FtoB(field, flag)
+
+  /* get the inner width of a layer */
+#define	LayerWidth(l)
+  /* get the inner height of a layer */
+#define	LayerHeight(l)
+
+  /* alignment for native displays */
+#define	natFixedMask(width)
+  /* alignment for cgfx displays */
+#define	cybFixedMask(width)
+
+  /* calculate layer-coordinate of x */
+#define FIXx(x)
+  /* calculate layer-coordinate of y */
+#define FIXy(y)
+  /* calculate offset of x/y in layer */
+#define FIXxy(x, y)
+
+  /* get base-address of BackArray or LUT for 1-8bit chunky-pixels */
+#define	dbPenGet(am)
+  /* get address of BackArray for x/y */
+#define	dbPen(db, x, y)
+  /* get base-address of BackArray or LUT for 32bit ulongs */
+#define	dbRGBAGet(am)
+  /* get address of BackArray for x/y */
+#define	dbRGBA(db, x, y)
+
+#define	DEBUGOUT(level, str, args...)
+#define	Error(str, args...)
+
+  /* convert palette-mode to include dithering */
+#define	MATCHtoDITHER(bool)
+  /* convert palette-mode to exclude dithering */
+#define	DITHERtoMATCH(bool)
+
+#define	IS_WEIGHTED(bool)
+#define	IS_HPCR(bool)
+#define	IS_GREY(bool)
+#define	IS_332SHIFT(bool)
+#define	IS_332MATCH(bool)
+#define	IS_TRUECOLOR(bool)
+
+#define	IS_SHIFT(bool)
+#define	IS_MATCH(bool)
+#define	IS_DITHER(bool)
+
+#define c8toc32(x)
+#define	c24tocg(r, g, b)
+#define	c24toc8(r, g, b)
+
+#define TC_RGBA(r, g, b)
+#define TC_ARGB(r, g, b)
+#define	TC_Color(col, rr, gg, bb, aa)
+
+#define	GR_RGBA(am, r, g, b)
+
+#define PLD_RGBA(am, r, g, b, x, y)
+#define PLG_RGBA(am, r, g, b)
+#define PL8_RGBA(am, r, g, b)
+
+#define MakeRGBP(am, r, g, b, x, y)
+#define MakeRGBA(am, r, g, b, a)
+
+#define	GetRGBP(am, idx)
+#define	GetRGBPLocal(idx)
+#define	GetIndex(am, idx)
+#define	GetIndexLocal(idx)
+
+/**********************************************************************/
+/*****              amigaMesa value-defines [private]             *****/
+/**********************************************************************/
+
+#define	CACHED
+#define	INVALID
+
+#define palNumCols332
+#define palNumCols
+#define palNumColsGrey
+#define palNumColsHPCR
+#define	palNumColsMax
+
+/**********************************************************************/
+/*****             amigaMesa boolean-defines [private]            *****/
+/**********************************************************************/
+
+  /* visual is double-buffered */
+#define	VISUAL_DOUBLEBUFFER
+  /* visual do stereo-rendering */
+#define	VISUAL_STEREO
+  /* visual is in rgb-mode */
+#define	VISUAL_RGBMODE
+  /* visual has alpha-chanel */
+#define	VISUAL_ALPHACHANNEL
+  /* visual detects accuracity itself */
+#define	VISUAL_AUTORGB
+
+  /* visual is our own */
+#define	RESOURCE_VISUAL
+  /* buffer is our own */
+#define	RESOURCE_BUFFER
+
+  /* palette-match should be cached */
+#define	PALETTE_CACHE
+  /* palette-match is dithered */
+#define	PALETTE_DITHER
+
+/**********************************************************************/
+/*****                amigaMesa functions [public]                *****/
+/**********************************************************************/
+
+/**********************************************************************/
+/*****               amigaMesa structures [public]                *****/
+/**********************************************************************/
+
+  /*
+   * definition:
+   *  AMESA_HPCR* gives the palette of the Hewlett-Packard Color-Recovery
+   *  and try to find the best exact match
+   *  AMESA_GREY* gives 64 grey-levels and try to find the best exact match
+   *  AMESA_TRUECOLOR* gives a palette based upon 3bits red, 3bits blue
+   *  2bits green and try to find the best exact match
+   * notes:
+   *  first part defines amigaMesa-specifig tag
+   *  second part defines the choosen palette (aka modelling of available colors)
+   *  third part defines methog to fetch data (aka encoding of given colors
+   *
+   *  at the moment dithering is only available in RGBMode, that means if we are
+   *  in index-mode the index-pixels are directly (without dither) mapped to
+   *  pen-pixels, it could be an improvement to offer dithering even for index-modes
+   */
+  typedef enum PaletteModeID {
+    /* dithering */
+    AMESA_HPCR_DITHER = -8,							/* hp-color-recovery */
+    AMESA_GREY_DITHER = -4,
+    AMESA_WEIGHTED_DITHER = -2,							/* default standard 0 */
+    AMESA_TRUECOLOR_DITHER = -1,						/* matches below 0 */
+    /* matching */
+    AMESA_HPCR_MATCH = 8,							/* hp-color-recovery */
+    AMESA_GREY_MATCH = 4,
+    AMESA_WEIGHTED_MATCH = 2,							/* default standard 0 */
+    AMESA_TRUECOLOR_MATCH = 1,							/* matches below 0 */
+    /* shifting */
+    AMESA_TRUECOLOR_SHIFT = 0,							/* shifts above 0 */
+    /* invalid */
+    AMESA_DEADFOOD = 0xDEAD							/* dead man */
+  } palMode;
+
+/**********************************************************************/
+/*****        amigaMesa TAGS (Create/Get/Change) [public]         *****/
+/**********************************************************************/
+
+  /*
+   * Amiga Mesa Attribute tag ID's.  These are used in the ti_Tag field
+   * of TagItem arrays passed to amigaMesaGet*()-, amigaMesaCreate*()-
+   * and amigaMesaChange*()-functions
+   */
+#define AMA_Dummy		(TAG_USER + 32)
+
+  /*
+   * definition:
+   *  border-sizes of drawable area
+   *  (drawable-size = layer-size - amesa-borders)
+   *  (visible-size = layer-size - layer-border)
+   * default:
+   *  left = top = bottom = right = 0
+   * notes:
+   *  amesa checks for valid ranges from 0 upto the rastport-size
+   *  and shrinks width/height if they doesn't fit them or fall below
+   *  0 and aborts if left/right or bottom/top overlaps
+   *  amesa prefers borders before sizes
+   *  if amesa find a window-tag it sets the borders to at least
+   *  the window-borders, so if you want to use GZZ you have NOT to
+   *  use the window-tag, use the rastport- and screen-tag instead
+   *  this too is a behaviour to make the system safe
+   * type:
+   *  GLshort
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_Left		(AMA_Dummy + 0x0001)
+#define AMA_Bottom		(AMA_Dummy + 0x0002)
+#define AMA_Right		(AMA_Dummy + 0x0003)
+#define AMA_Top			(AMA_Dummy + 0x0004)
+
+  /*
+   * definition:
+   *  the width and height of the drawable area
+   * default:
+   *  width = height = layer-size - layer-borders
+   * notes:
+   *  amesa checks for valid ranges from 0 upto the rastport-size
+   *  and shrinks width/height if they doesn't fit them or fall below
+   *  0 and aborts if left/right or bottom/top overlaps
+   *  amesa prefers borders before sizes
+   * type:
+   *  GLshort
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_Width		(AMA_Dummy + 0x0010)
+#define AMA_Height		(AMA_Dummy + 0x0011)
+
+  /*
+   * definition:
+   *  the default procedure for mapping rgb to pen
+   * default:
+   *  AMESA_WEIGHTEDCOLOR
+   * type:
+   *  palmode
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_PaletteMode		(AMA_Dummy + 0x0020)
+  /*
+   * definition:
+   *  tries to cache previous calculated pens for faster matching
+   * default:
+   *  GL_FALSE
+   * notes:
+   *  not used if AMESA_TRUECOLORSHIFT
+   * type:
+   *  GLboolean
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_PaletteCache	(AMA_Dummy + 0x0021)
+
+#define AMA_PaletteDither	(AMA_Dummy + 0x0022)
+
+  /*
+   * definition:
+   *  the screen the context is bind to (needs a rastport too)
+   * default:
+   *  NULL
+   * notes:
+   *  amesa prefers windows before screens and rastports
+   *  if you want to use a screens rastport for rendering
+   *  (fullscreen) you have to pass &Screen->RastPort, I
+   *  havn't enabled it by default to force knowledge of
+   *  what you are doing there
+   *  screens are needed for palette-allocation and remapping
+   *  only
+   * type:
+   *  struct Screen *
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_Screen		(AMA_Dummy + 0x0030)
+  /*
+   * definition:
+   *  the rastport the context is bind to (needs a screen too)
+   * default:
+   *  NULL
+   * notes:
+   *  amesa prefers windows before screens and rastports
+   *  at the moment you can't render to a unvisible rastport
+   *  but i'm working of that
+   *  rastports are the areas amesa renders to, checks it's sizes
+   *  etc. pp. (rastports are the main-devices)
+   * type:
+   *  struct RastPort *
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_RastPort		(AMA_Dummy + 0x0032)
+
+  /*
+   * definition:
+   *  the window the context is bind to
+   * default:
+   *  NULL
+   * notes:
+   *  amesa prefers windows before screens and rastports
+   *  windows are needed for getting the rastport/screen only
+   * type:
+   *  struct Window *
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_Window		(AMA_Dummy + 0x0031)
+
+  /*
+   * definition:
+   *  use offscreen-rendering instead of direct drawing and
+   *  flush the contents of the offscreen-buffer at swap
+   * default:
+   *  GL_FALSE
+   * type:
+   *  GLboolean
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_DoubleBuffer	(AMA_Dummy + 0x0040)
+  /*
+   * definition:
+   *  use rgb-rendering instead of direct index-rendering and
+   *  convert the rgb-values at first in the driver (or in case
+   *  of double-buffering at swap)
+   * default:
+   *  GL_FALSE
+   * type:
+   *  GLboolean
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_RGBMode		(AMA_Dummy + 0x0041)
+  /*
+   * definition:
+   *  use an alpha-channel in addition to rgb (for ? (blending?))
+   * default:
+   *  GL_FALSE
+   * type:
+   *  GLboolean
+   * notes:
+   *  requires rgb
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_AlphaChannel	(AMA_Dummy + 0x0042)
+  /*
+   * definition:
+   *  ? (stereo-rendering?)
+   * default:
+   *  GL_FALSE
+   * type:
+   *  GLboolean
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_Stereo		(AMA_Dummy + 0x0043)
+
+  /*
+   * definition:
+   *  number of bits used in depth-buffers
+   *  or <= 0 for disabling
+   * default:
+   *  DEPTH_BITS
+   * type:
+   *  GLint
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_BitsDepth		(AMA_Dummy + 0x0044)
+  /*
+   * definition:
+   *  number of bits used in accumulation-buffers
+   *  or <= 0 for disabling
+   * default:
+   *  ACCUM_BITS
+   * type:
+   *  GLint
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_BitsAccum		(AMA_Dummy + 0x0045)
+  /*
+   * definition:
+   *  number of bits used in stencil-buffers
+   *  or <= 0 for disabling
+   * default:
+   *  STENCIL_BITS
+   * type:
+   *  GLint
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_BitsStencil		(AMA_Dummy + 0x0046)
+
+  /*
+   * definition:
+   *  disable use of 3D-hardware
+   * default:
+   *  GL_FALSE
+   * type:
+   *  GLboolean
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_No3D		(AMA_Dummy + 0x0047)
+
+  /*
+   * definition:
+   *  specify an shared context for this context
+   * default:
+   *  NULL
+   * type:
+   *  amigaMesaContext
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Context
+   */
+#define AMA_ShareGLContext	(AMA_Dummy + 0x0050)
+  /*
+   * definition:
+   *  get the context of a given context
+   * default:
+   *  NULL
+   * type:
+   *  GLcontext *
+   * availability:
+   *  Get
+   * affects:
+   *  Context
+   */
+#define AMA_GLContext		(AMA_Dummy + 0x0054)
+
+  /*
+   * definition:
+   *  get the visual of a given context
+   * default:
+   *  NULL
+   * type:
+   *  amigaMesaVisual
+   * availability:
+   *  Get
+   * affects:
+   *  Context/Visual
+   */
+#define AMA_Visual		(AMA_Dummy + 0x0051)
+  /*
+   * definition:
+   *  get the buffer of a given context
+   * default:
+   *  NULL
+   * type:
+   *  amigaMesaBuffer
+   * availability:
+   *  Get
+   * affects:
+   *  Context/Visual/Buffer
+   */
+#define AMA_Buffer		(AMA_Dummy + 0x0052)
+  /*
+   * definition:
+   *  specify a window-id for this buffer
+   * default:
+   *  NULL
+   * type:
+   *  GLshort
+   * availability:
+   *  Create/Get/Change
+   * affects:
+   *  Buffer
+   */
+#define AMA_WindowID		(AMA_Dummy + 0x0053)
+
+  /*
+   * definition:
+   *  get the depth of a given visual
+   * default:
+   *  Screen->RastPort.BitMap->Depth
+   * type:
+   *  GLint
+   * availability:
+   *  Get
+   * affects:
+   *  Visual
+   */
+#define	AMA_VisualDepth		(AMA_Dummy + 0x0060)
+  /*
+   * definition:
+   *  get the depth of a given context
+   * default:
+   *  Screen->RastPort.BitMap->Depth
+   * type:
+   *  GLint
+   * availability:
+   *  Get
+   * affects:
+   *  Context
+   */
+#define	AMA_ContextDepth	(AMA_Dummy + 0x0061)
+  /*
+   * definition:
+   *  get the visual of a given visual
+   * default:
+   *  ...
+   * type:
+   *  GLvisual *
+   * availability:
+   *  Get
+   * affects:
+   *  Visual
+   */
+#define	AMA_VisualGLVisual	(AMA_Dummy + 0x0062)

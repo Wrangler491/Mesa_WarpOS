@@ -1,0 +1,295 @@
+#ifndef	AMIGAMESAint_I
+#define	AMIGAMESAint_I
+
+/*
+ * $Id: $
+ */
+
+/*
+ * Mesa 3-D graphics library
+ * Version:  3.1
+ * Copyright (C) 1995  Brian Paul  (brianp@ssec.wisc.edu)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free
+ * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#define	NO_CONTEXT_LIBRARIES		/* do not pass library-bases over contexts */
+#define	REPLACE_ALLOC			/* replace malloc/calloc/free with pool-functions */
+//#define	PREVENT_LUT		/* use real calculation instead of LUTs */
+
+/************************************************************************
+ *
+ * basic os-dependent
+ */
+
+#if 0
+/*
+ * A is the blitmask (temporary memory passed to Blt#? as TempA)
+ * B is the source-bitmap
+ * C is the destination bitmap
+ */
+
+#define	LOGIC_CLEAR	
+#define	LOGIC_SET	
+#define	LOGIC_COPY	(ABC | ABNC)
+#define	LOGIC_COPY_INV	(ANBC | ANBNC)
+#define	LOGIC_NOOP	
+#define	LOGIC_INV	
+#define	LOGIC_AND	(ABC)
+#define	LOGIC_NAND	(ANBC)
+#define	LOGIC_OR	(ABC | ANBC | ABNC) | (NABC | NANBC | NABNC)
+#define	LOGIC_NOR	(ANBC | ABC | ANBNC) | (NANBC | NABC | NANBNC)
+#define	LOGIC_XOR	(ANBC | ABNC) | (NANBC | NABNC)
+#define	LOGIC_XNOR	(ABC | ANBNC) | (NABC | NANBNC)
+#endif
+
+/************************************************************************
+ *
+ * inlines
+ */
+
+/************************************************************************
+ *
+ * MESA_AOS kernel structures
+ */
+
+#define	AOS_KERNEL
+
+/*****************************************************************************
+ *
+ * private palette-definitions
+ */
+#define	PALETTE_DEFS
+#include "AOS/palettes.i"
+#undef	PALETTE_DEFS
+
+/*****************************************************************************
+ *
+ * private visual
+ */
+#define	amigamesa_visual_context	%d
+#define	amigamesa_visual_gl_visual	%d
+#define	amigamesa_visual_flags		%d
+#define	amigamesa_visual_depth		%d
+
+#define	VISUAL_DOUBLEBUFFER	(1 << 0)			/* double buffered? */
+#define	VISUAL_STEREO		(1 << 1)			/* stereo mode? */
+#define	VISUAL_RGBMODE		(1 << 2)			/* RGB mode?  */
+#define	VISUAL_ALPHACHANNEL	(1 << 3)			/* Alphacolor? */
+
+#define	VISUAL_AUTORGB		(1 << 8)			/* autodetect RGB mode? */
+
+/*****************************************************************************
+ *
+ * private buffer
+ *
+ * TODO: check for size compatibility of buffer vs. context if AMA_Buffer!!!
+ */
+#define	amigamesa_buffer_context		%d
+#define	amigamesa_buffer_gl_buffer		%d
+#define	amigamesa_buffer_attachedWindowID	%d
+
+/*****************************************************************************
+ *
+ * private context
+ */
+#define	amigamesa_context_gl_ctx	%d
+#define	amigamesa_context_gl_share	%d
+
+#define	amigamesa_context_visual	%d
+#define	amigamesa_context_buffer	%d
+
+#define	amigamesa_context_mempool	%d
+
+#define	amigamesa_context_lastAction	%d
+
+#define	amigamesa_context_flags		%d
+
+#define	RESOURCE_VISUAL		(1 <<  0)			/* contexts visual is it's own */
+#define	RESOURCE_BUFFER		(1 <<  1)			/* contexts buffer is it's own */
+
+#define	PALETTE_CACHE		(1 <<  8)			/* try to cache pens for speedup pen-determination */
+#define	PALETTE_DITHER		(1 <<  9)			/* dither all values before GetPen */
+
+#define	amigamesa_context_pixel		%d
+#define	amigamesa_context_clearpixel	%d
+
+#define	amigamesa_context_window	%d
+#define	amigamesa_context_rp		%d
+#define	amigamesa_context_Screen	%d
+
+#define	amigamesa_context_front_rp	%d
+#define	amigamesa_context_back_rp	%d
+#define	amigamesa_context_tmpras	%d
+#define	amigamesa_context_temprp	%d
+#define	amigamesa_context_BackArray	%d
+#define	amigamesa_context_imageline	%d
+
+#define	amigamesa_context_depth		%d
+
+#define	amigamesa_context_width		%d
+#define	amigamesa_context_height	%d
+#define	amigamesa_context_left		%d
+#define	amigamesa_context_bottom	%d
+#define	amigamesa_context_right		%d
+#define	amigamesa_context_top		%d
+#define	amigamesa_context_RealWidth	%d
+#define	amigamesa_context_RealHeight	%d
+#define	amigamesa_context_FixedWidth	%d
+#define	amigamesa_context_FixedHeight	%d
+
+#define	amigamesa_context_FixedX	%d
+#define	amigamesa_context_FixedY	%d
+#define	amigamesa_context_FixedXY	%d
+#define	amigamesa_context_FixedXYdb	%d
+
+#define	amigamesa_context_trueColor	%d
+#define	amigamesa_context_PaletteCols	%d
+#define	amigamesa_context_Palette	%d
+#define	amigamesa_context_MatchErrors	%d
+#define	amigamesa_context_penCache	%d
+#define	amigamesa_context_ItoP		%d
+#define	amigamesa_context_PtoI		%d
+
+#define	amigamesa_context_InitDD	%d
+#define	amigamesa_context_Dispose	%d
+#define	amigamesa_context_SwapBuffer	%d
+
+#define	NO_CONTEXT_LIBRARIES
+#ifndef	NO_CONTEXT_LIBRARIES
+  /* speeds up inlines needn't to restore a4 as they get the library-bases
+   * out of the context not a4! */
+#define	amigamesa_context_aSysBase	%d
+#define	amigamesa_context_aDOSBase	%d
+#define	amigamesa_context_aGfxBase	%d
+#define	amigamesa_context_aUtilityBase	%d
+#define	amigamesa_context_aCyberGfxBase	%d
+#ifndef	NO_CONTEXT_AVAILABLE
+#define	SysBase		(amesa + amigamesa_context_aSysBase)
+#define	DOSBase		(amesa + amigamesa_context_aDOSBase)
+#define	GfxBase		(amesa + amigamesa_context_aGfxBase)
+#define	UtilityBase	(amesa + amigamesa_context_aUtilityBase)
+#define	CyberGfxBase	(amesa + amigamesa_context_aCyberGfxBase)
+#endif
+#endif
+};
+
+/* set a flag */
+#define	SetF(field, flag)	((field) |= (flag))
+/* clear a flag */
+#define	ClrF(field, flag)	((field) &= ~(flag))
+/* swap a flag */
+#define	SwpF(field, flag)	((field) ^= (flag))
+/* test a flag */
+#define	TstF(field, flag)	((field) & (flag))
+
+/* convert a flag to a boolean */
+#define	FtoB(field, flag)	(TstF(field, flag) ? GL_TRUE : GL_FALSE)
+
+/*****************************************************************************
+ *
+ * private externals
+ */
+
+//#define	TRYTEST	1
+#define	presets_trueColor	%d
+#define	presets_tryCached	%d
+#define	presets_tryTest		%d
+#define	presets_Dither		%d
+
+/*****************************************************************************
+ *
+ * includes
+ */
+
+/*****************************************************************************
+ *
+ * private palette-prototypes
+ */
+#define	PALETTE_PROTOS
+#include "AOS/palettes.i"
+#undef	PALETTE_PROTOS
+
+/*****************************************************************************
+ *
+ * Note that you'll usually have to flip Y coordinates since Mesa's
+ * window coordinates start at the bottom and increase upward.  Most
+ * window system's Y-axis increases downward
+ *
+ * See dd.h for more device driver info.
+ * See the other device driver implementations for ideas.
+ */
+#define	LayerWidth(l)		(l->bounds.MaxX - l->bounds.MinX + 1)
+#define	LayerHeight(l)		(l->bounds.MaxY - l->bounds.MinY + 1)
+#define	natFixedMask(width)	(((width) + 15) & 0xFFFFFFF0)	/* 16byte aligned */
+#define	cybFixedMask(width)	(((width) +  3) & 0xFFFFFFFC)	/*  4byte aligned */
+#ifdef	PREVENT_LUT
+#define FIXx(x)			(amesa->left + (x))
+#define FIXy(y)			(amesa->FixedHeight - amesa->bottom - (y))
+#define FIXxy(x,y)		(amesa->FixedWidth * FIXy(y) + FIXx(x))
+#define	dbPenGet(am)		((GLubyte *)((am)->BackArray))
+#define	dbPen(db, x, y)		(((GLubyte *)(db)) + FIXxy((x), (y)))
+#define	dbRGBAGet(am)		((GLuint *)((am)->BackArray))
+#define	dbRGBA(db, x, y)	(((GLuint *)(db)) + FIXxy((x), (y)))
+#else
+#define FIXx(x)			(amesa->FixedX + (x))
+#define FIXy(y)			(amesa->FixedY - (y))
+#define FIXxy(x,y)		(amesa->FixedXY[(y)] + (x))
+#define	dbPenGet(am)		((GLubyte *)((am)->FixedXYdb))	/*  (GLubyte **) */
+#define	dbPen(db, x, y)		(((GLubyte **)(db))[(y)] + (x))	/* *(GLubyte **) */
+#define	dbRGBAGet(am)		((GLuint *)((am)->FixedXYdb))	/*  (GLuint **) */
+#define	dbRGBA(db, x, y)	(((GLuint **)(db))[(y)] + (x))	/* *(GLuint **) */
+#endif
+
+/*****************************************************************************
+ *
+ * ???
+ */
+
+#define MAX_POLYGON 300
+
+/*****************************************************************************
+ *
+ * debugging output
+ */
+/* deactive debugging-output only on request */
+#if !defined(NDEBUG) && !defined(NODEBUG)
+extern LONG debugOutput;
+#include <stdio.h>
+#define DEBUGOUT(level,str,args...) ({	\
+  if(debugOutput >= level) {		\
+ /* Printf(str,"gl  : "); */		\
+ /* Printf(str,##args);	*/		\
+    fprintf(stderr,"gl  : ");		\
+    fprintf(stderr,str,##args);		\
+    fflush(stderr);			\
+  }					\
+})
+#else
+#define DEBUGOUT(level,str,args...) ({})
+#define	DEBUGOUT_REMOVED
+#endif
+
+#include <stdio.h>
+#define Error(str,args...) ({		\
+/*Printf("Fatal error: "); */		\
+/*Printf(str,##args); */		\
+  fprintf(stderr,"Fatal error: ");	\
+  fprintf(stderr,str,##args);		\
+  fflush(stderr);			\
+  abort();				\
+})
+
+#endif

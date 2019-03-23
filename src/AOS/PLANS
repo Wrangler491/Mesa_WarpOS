@@ -1,0 +1,255 @@
+/*****************************************************************************/
+/*****************************************************************************/
+
+ caveats:
+
+  - seperated clusters of functionality:
+    - display (graphics-driver)
+    - internals (GL-processor)
+    - communication (GL-parser)
+      - module-manager (configuration of clusters)
+
+    application
+	^
+	|
+	+---> communication <-----*------> display
+		^			    ^
+		|			    .
+		*------> internals <......... (hybrid)
+
+    (* possible through any kind of communication-way)
+
+    (the communicator talks with the GL-processor that talks with the
+     displayer. every part of it can be replaced. some examples for
+     the existing ports: aMesaGL (display), AMRTL (display),
+     StormMesa (display) differs mainly only for the display-part,
+     CyberGL (display, internals) uses it's own GL-processor)
+    
+    (it is questionable if the GL-processor has to speak directly
+     to the displayer, for better design it has not, for faster access
+     yes (there is something tricky: someone can program a hybrid of
+     displayer and GL-processor reducing message-passing to a minimum
+     (dummy-messages only for syncronisation with the application))
+    
+    (if the table-approach is taken, there is an easy direct communication
+     between core and displayer possible, no need for hybrids)
+
+  - runtime exchanging of clusters/modules
+  - a module-manager of all available services (hmm, sounds like
+    jini :^) so the user can specify how to drive his machine
+
+ descriptions:
+
+  - communicator:
+    - OS-dependent
+
+    (can be a local-communicator that passes the function-parameters
+     directly to the other module or something really weird like a
+     Envoy-connector, the communicator depends heavily on the
+     module-manager)
+
+  - internals:
+    - OS-independent
+    - Mesa or another processor
+
+    (nothing to talk about in special)
+
+  - display:
+    - OS-dependent
+    - all function for display-lists of the core (3D-support)
+
+    (there is some work to do, we have to build a mechanism that doesn't
+     fiddles with references, but with locks (eg. a pointer to the
+     framebuffer of the vax at the university isn't usefull), and
+     manipulation of the thing that displays the display becomes harder
+     as any abstractions of the display are visible)
+
+    (in case of 3D-support it's a bit confusing which functions to
+     put in the displayer, I think it's best to put every 2D-things
+     to the displayer and let someone with a 3D-driver program a
+     hybrid or not (PowerVR has fantastic capabilities and can
+     do much of the OpenGL-functionality and is a candidate for a hybrid,
+     Virge3D is more simple and doesn't need a hybrid)
+
+ capabilities:
+
+  - every module has to identify itself and it's capabilities to the
+    module-manager (extensions, basics)
+  - the module-manager has to choose a combination of the modules that
+    fits best for the user-purposes (like BestModeID)
+  - extensions-calls has to be passed directly from the application to
+    the communicator (extension-ID-calls)
+
+ implementation:
+
+  - functions:
+   - struct glAContext *glACreateContext(struct TagItem Tags, ...);
+     void glAChangeContext(struct glAContext *glAc, struct TagItem Tags, ...);
+     void glADestroyContext(struct glAContext *glAc);
+
+     is mainly a module-manager-specific function
+
+     request-tags:
+
+      AGL_INT_CAPABILITY	0x????????
+      AGL_DISP_CAPABILITY	0x????????
+      ....
+     
+     capability-requests:
+     
+      INT_CAP_LIGHTS		0x????????
+      INT_CAP_3DHARDWARE	0x????????	(hardware-support for core)
+      INT_CAP_RADIOSITY		0x????????
+      DISP_CAP_3DHARDWARE	0x????????	(hardware-support for display)
+      DISP_CAP_OFFSCREEN	0x????????	(offscreen-framebuffer)
+      ...
+
+   (all functions of the displayer and the core are written into a
+    vector-table, all function-calls are passed through the stack,
+    all display- and core-funtions are called inlined or stub-based
+    directly from the application)
+
+   - struct glAVisual *glACreateVisual(struct TagItem Tags, ...);
+     void glAChangeVisual(struct glAVisual *glAv, struct TagItem Tags, ...);
+     void glADestroyVisual(struct glAVisual *glAv);
+
+     is mainly a displayer-function ONLY called from the manager
+
+  - function-calling (application):
+
+   /**************************************************************************/
+
+   #ifdef BUILD_STUBS
+   #undef inline
+   #else
+   #define extern static
+   #endif
+
+   struct glAContext {
+     ... (*basicTable) (args...)[];
+     ... (*extTable) (args...)[];
+
+     ...
+   };
+
+   #define GL_SETCOLOR3F	0x???????
+   #define GLEXT_SETWINDOW	0x???????
+
+   ... glSetColor3f(...);
+   ... glAextSetWindow(...);
+
+   extern struct glAContext *globalContext;
+
+   #define glcall(vec, args...)		globalContext->basicTable[vec](args)
+   #define glextcall(vec, args...)	globalContext->extTable[vec](args)
+
+   extern inline ... glSetColor3f(args...) {
+     return glcall(GL_SETCOLOR3F, args...);
+   }
+
+   extern inline ... glAextSetWindow(args...) {
+     return glextcall(GLEXT_SETWINDOW, args...);
+   }
+
+   /**************************************************************************/
+
+   (all os-specific function are extension (makes life easier))
+
+  - module-manager:
+   - context/visual/... management
+   - table-management
+   - has a public port that let a new module join the list (manager-inter-
+     communication and syncronisation through TCP/LAN etc.)
+   - checks public HD-places for modules
+
+   (on non-protected OSs the manager can pass the function-vectors directly
+    to the table, otherwise a small function is called that sends the args
+    and get back the returnval, the whole problem of memory-protection is
+    centralized in the manager (that is not difficult to write), NONE of the
+    modules (on no OS) has to take care of protection-state/level)
+
+
+/*****************************************************************************/
+/*****************************************************************************/
+
+ implementation details:
+
+   all functions of gl/glu/glut/... are replaced by functions that build the
+  manager
+
+   the manager splits the functions in display-dependent (gl/glut/...) and
+  core-dependent (gl/glu/...)
+
+   on program-startup the manager tries to detect any local display and core
+  and parses the command-line for specifications of special display- and core-
+  adresses on other machines through specified communication-ways
+
+   the manager sets up the specified display (local/net/...) and initialize
+  the core with the parameters to call the display (local/net/...) directly
+  now the core and display can talk to another without using the manager
+  the manager has only to call display- or core-functions
+
+ example of a local manager, local core and local display call:
+
+  manager	detects core local
+  manager	detects display local
+  manager	gives the core the localDisplay display that calls
+		the calls in the local display
+  application	calls glFlush()
+  manager	function glFlush() is called
+  manager	knows core is local and calls glFlush() in the localCore
+  localCore	function glFlush() is called
+  localCore	do something internal and calls Flush() in localDisplay
+  localDisplay	function Flush() is called
+  localDisplay	puts the data onto the display and returns
+  localCore	get return-value and returns
+  manager	get return-value and returns
+  application	checks return-value
+
+ example of a local manager, local core and net display call:
+
+  manager	detects core local
+  manager	detects display on another machine
+  manager	gives the core the netDisplay display that calls
+		the calls in the net display
+  application	calls glFlush()
+  manager	function glFlush() is called
+  manager	knows core is local and calls glFlush() in the localCore
+  localCore	function glFlush() is called
+  localCore	do something internal and calls Flush() in netDisplay
+  netDisplay	function Flush() is called
+  netDisplay	transfers informations to targetDisplay
+  targetDisplay	recieves informations from netDisplay
+  targetDisplay	function Flush() is called
+  targetDisplay	puts the data onto the display and transfers return-value
+		to netDisplay
+  netDisplay	recieves return-value and returns
+  localCore	get return-value and returns
+  manager	get return-value and returns
+  application	checks return-value
+
+ example of a local manager, net core and local display call:
+
+  manager	detects core on another machine
+  manager	detects display local
+  manager	gives the core the netDisplay display that calls
+		the calls in the local display
+  application	calls glFlush()
+  manager	function glFlush() is called
+  manager	knows core is away and calls glFlush() in the netCore
+  netCore	function glFlush is called
+  netCore	transfers informations to targetCore
+  targetCore	recieves informations from netCore
+  targetCore	function glFlush() is called
+  targetCore	do something internal and calls Flush() in netDisplay
+  netDisplay	function Flush() is called
+  netDisplay	transfers informations to localDisplay
+  localDisplay	recieves informations from netDisplay
+  localDisplay	function Flush() is called
+  localDisplay	puts the data onto the display and transfers return-value
+		to netDisplay
+  netDisplay	recieves return-value and returns
+  targetCore	get return-value and transfers return-value
+  netCore	recieves return-value and returns
+  manager	get return-value and returns
+  application	checks return-value

@@ -1,0 +1,82 @@
+In <MPG.123f3c665cf4100a98969b@news.stormnet.com>, Kendall Bennett
+writes:
+ > I am trying to find out how to build the fastest algorithm to find the 
+ > closest RGB color in a palette. This function is used to convert pixels 
+ > on the fly from an RGB bitmap to a 256 color bitmap with a specific 
+ > palette (no dithering). Right now I am simply doing a search of all 256 
+ > entries in the palette and finding the one closest in color range  (ie: 
+ > ABS() of all color component differences is smallest).
+
+To get a perfect Euclidean mapping to the palette, you could use
+Voronoi (sp?) polygons/polyhedra.  A Voronoi polygon is the polygon
+bounding the area that consists of all points that would map to the
+given palette entry.  Confused?
+
+ +--Red-------------------A------+
+Green         | |                |
+ |           |   |               |  E bisects P2-P4
+ |   P1     |     H              B  F bisects P3-P4
+ |         |       |             |  G bisects P1-P3
+ |        |         |      P2    |  H bisects P2-P3
+ D       |           |           |
+ |      |     P3      |          |
+ |     |               ......E...|
+ |    G               -          |
+ |   |               -           |
+ |  |               -            |
+ | |               F       P4    |
+ ||               -              |
+ |               -               |
+ +-----------C-------------------+
+
+For the four colour palette (P1-P4), in red & green only, the Voronoi
+polygons are:
+	V1 (for P1): AGD
+	V2 (for P2): ABEH
+	V3 (for P3): AHFCDF
+	V4 (for P4): EBCF
+
+For any colour inside V1, if we did the Euclidean calculation
+(min(R-R' * G-G')), the closest palette colour would be P1.  For any
+colour outside V1, it would be some other palette colour.
+
+Armed with the Voronoi polyhedra, we build a BSP tree.  Due to the
+alignment of the bounding surfaces (not orthogonal to the x, y, z (R,
+G, B) planes), we need to use non-aligned planes in the BSP tree.
+Even then, we will sever some polyhedra when bisecting space.  When
+we do, create two replacement polyhedra (V4' and V4" below).
+
+ +--Red---------+     +---------A------+
+Green         | |     |                |
+ |           |   |     |               |
+ |   V1     |     H     |              B
+ |         |       |     |             |
+ |        |         |     |      V2    |
+ D       |           |     |           |
+ |      |     V3      |     |          |
+ |     |               |     |.....E...|
+ |    G               - |     |        |
+ |   |               -   |     |       |
+ |  |               -     |     |      |
+ | |               F       |     |  V4"|   /--- here
+ ||               -   V4'   |     |    |   \---
+ |               -           |     |   |
+ +-----------C---------------+     +---+
+
+Repeat until every leaf contains only one polyhedron.  Now we have a
+BSP: but searched by dot-products (pixel vs plane), rather than the
+usual X or Y or Z calculation.
+
+Pros:
+ * perfect Euclidean mapping to given palette;
+ * faster per pixel than exhaustive search;
+
+Cons:
+ * Expensive to pre-process palette;
+ * Requires much more math knowledge than the simpler methods;
+
+Edmund.
+-- 
+Edmund Stephen-Smith            ||  edmund@suave  ||
+                                ||  .demon.co.uk  ||
+

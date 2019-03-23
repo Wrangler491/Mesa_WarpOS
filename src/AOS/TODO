@@ -1,0 +1,133 @@
+/*
+ * TODO:
+ * Dynamic allocate the vectorbuffer for polydrawing. (memory improvment)
+ * implement shared list.
+ * fix resizing bug.
+ * some native asm rutine
+ * fast asm line drawin in db mode
+ * fast asm clear       in db mode
+ * read buffer rutines  in db-mode
+ * 
+ * IDEAS:
+ */
+
+/*
+ * TODO:
+ *  -implement dither-availability as kind of doublebuffering
+ *   can be done as cybergraphics + doublebuffer + swap[dither and/or quantize]
+ */
+
+/*
+ * remove all amigaMesaContext-variables out of the kernel-functions
+ */
+
+/*
+ * maybe the standard Line/Area-functions can even be used by
+ * the cybDisplay:
+ * - allocate an exact pen of the rgb-value and use that pen for
+ *   drawing
+ * that means we must remove the AllocCMap for >8bit
+ * and there is a question: are there any CI*-function calls in cybDisplay?
+ * maybe I must recheck the CreateVisual-function ...
+ */
+
+/*
+ * - changes in the non-doublebuffer functions:
+ *   - implemented GL_INVERTED for cybergraphx (via InvertPixelArray) and
+ *     all others for the native (via minterms) display
+ *   - changed the WriteCI32/WriteCI8-functions to use WriteLUTArray
+ * - changes in the doublebuffer functions:
+ *   - dithered output
+ */
+
+/*
+ * remove casts from all that index-stuff
+ */
+
+/*
+ *  for (s = n - 1; s >= 0; s--, x++) {
+ * ==
+ *  for (--((GLshort)n); ((GLshort)n) >= 0; --((GLshort)n) x++) {
+ * ==
+ *  while (--((GLshort)n) >= 0) {
+ *    ...
+ *    x++;
+ *  }
+ */
+
+/*
+ * remove *Base-references from a4-relative to absolute addresses
+ * to give the optimizer one more register in case of not loading
+ * a4
+ */
+
+/*
+ * LayerWidth/LayerHeight seems not to work with Screen->RastPort->Layer
+ * Why?
+ */
+
+/*
+ * split amigamesa.c into manager, client and server functions
+ * and restructure the source in that way it reflect
+ * the split cleanly
+ */
+
+void netPointers(GLcontext * ctx)
+{
+  DEBUGOUT(1, "netPointers()\n");
+
+  ctx->Driver.RendererString = netRendererString;
+  if (((netMesaContext) ctx->DriverCtx)->Client.ExtensionString)
+    ctx->Driver.ExtensionString = netExtensionString;
+
+  ctx->Driver.UpdateState = netPointers;
+  ctx->Driver.ClearIndex = netClearIndex;
+  ctx->Driver.ClearColor = netClearColor;
+  ctx->Driver.Clear = netClear;
+
+  ctx->Driver.Index = netSetIndex;
+  ctx->Driver.Color = netSetColor;
+
+  if (((netMesaContext) ctx->DriverCtx)->Client.IndexMask)
+    ctx->Driver.IndexMask = netIndexMask;
+  if (((netMesaContext) ctx->DriverCtx)->Client.ColorMask)
+    ctx->Driver.ColorMask = netColorMask;
+  if (((netMesaContext) ctx->DriverCtx)->Client.LogicOp)
+    ctx->Driver.LogicOp = netLogicOp;
+  if (((netMesaContext) ctx->DriverCtx)->Client.Dither)
+    ctx->Driver.Dither = netDither;
+
+  ctx->Driver.SetBuffer = netSetBuffer;
+  ctx->Driver.GetBufferSize = netStandardResize;
+
+  if (((netMesaContext) ctx->DriverCtx)->Client.Finish)
+    ctx->Driver.Finish = netFinish;
+  if (((netMesaContext) ctx->DriverCtx)->Client.Flush)
+    ctx->Driver.Flush = netFlush;
+
+  ctx->Driver.PointsFunc = netChoosePointsFunction(ctx);
+  ctx->Driver.LineFunc = netChooseLineFunction(ctx);
+  ctx->Driver.TriangleFunc = netChooseTriangleFunction(ctx);
+  ctx->Driver.QuadFunc = netChooseQuadFunction(ctx);
+  ctx->Driver.RectFunc = netChooseRectFunction(ctx);
+
+  /* Pixel/span writing functions: */
+  ctx->Driver.WriteRGBASpan = netWriteRGBASpan;
+  ctx->Driver.WriteRGBSpan = netWriteRGBSpan;
+  ctx->Driver.WriteCI32Span = netWriteCI32Span;
+  ctx->Driver.WriteCI8Span = netWriteCI8Span;
+  ctx->Driver.WriteMonoRGBASpan = netWriteMonoCISpan;				/* same  */
+  ctx->Driver.WriteMonoCISpan = netWriteMonoCISpan;
+
+  ctx->Driver.WriteRGBAPixels = netWriteRGBAPixels;
+  ctx->Driver.WriteCI32Pixels = netWriteCI32Pixels;
+  ctx->Driver.WriteMonoRGBAPixels = netWriteMonoCIPixels;			/* same  */
+  ctx->Driver.WriteMonoCIPixels = netWriteMonoCIPixels;
+
+  /* Pixel/span reading functions: */
+  ctx->Driver.ReadRGBASpan = netReadRGBASpan;
+  ctx->Driver.ReadCI32Span = netReadCI32Span;
+
+  ctx->Driver.ReadRGBAPixels = netReadRGBAPixels;
+  ctx->Driver.ReadCI32Pixels = netReadCI32Pixels;
+}

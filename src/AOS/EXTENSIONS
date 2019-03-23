@@ -1,0 +1,62 @@
+  /**********************************************************************
+   *** Optional functions:  these functions may or may not be         ***
+   *** implemented by the device driver.  If the device driver        ***
+   *** doesn't implement them it should never touch these pointers    ***
+   *** since Mesa will either set them to NULL or point them at a     ***
+   *** fall-back function.                                            ***
+   ***                                                                ***
+   *** these are my own extensions to the device-driver as often      ***
+   *** there exists calls that access whole array or we can quick     ***
+   *** optimize a bunch of span-calls to one array-call               ***
+   **********************************************************************/
+
+  /***
+   *** Functions for writing pixels to the frame buffer:
+   ***/
+
+  void (*WriteRGBAArray)( const GLcontext *ctx,
+                          GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                          CONST GLubyte rgba[][4], const GLubyte mask[][] );
+  void (*WriteRGBArray)( const GLcontext *ctx,
+                         GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                         CONST GLubyte rgba[][3], const GLubyte mask[][] );
+  /* Write an array of RGB[A] pixels.  The later version is only
+   * used to accelerate GL_RGB, GL_UNSIGNED_BYTE glDrawPixels() calls.
+   */
+
+  void (*WriteMonoRGBAArray)( const GLcontext *ctx,
+                              GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                              const GLubyte mask[][] );
+  /* Write an array of mono-RGBA pixels.
+   */
+
+  void (*WriteCI32Array)( const GLcontext *ctx,
+                          GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                          const GLuint index[], const GLubyte mask[][] );
+  void (*WriteCI8Array)( const GLcontext *ctx,
+                         GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                         const GLubyte index[], const GLubyte mask[][] );
+  /* Write an array of CI pixels.  32 or 8bpp.
+   */
+
+  void (*WriteMonoCIArray)( const GLcontext *ctx,
+                            GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                            const GLubyte mask[][] );
+  /* Write an array of mono-CI pixels.
+   */
+
+  /***
+   *** Functions to read Arrays from frame buffer:
+   ***/
+
+  void (*ReadRGBAArray)( const GLcontext *ctx,
+                         GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                         CONST GLubyte rgba[][4] );
+  /* Read an array of RGBA pixels.
+   */
+
+  void (*ReadCI32Array)( const GLcontext *ctx,
+                         GLint rowsize, GLint x, GLint y, GLint width, GLint height,
+                         const GLuint index[] );
+  /* Read an array of color index pixels.
+   */

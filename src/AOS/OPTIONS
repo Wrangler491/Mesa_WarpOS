@@ -1,0 +1,27 @@
+ There are some Variables you might set:
+
+ "Set MESA_DEBUG ON/OFF <number>"
+ OFF disables output of information, ON enables it.  The number ranges from
+0 (OFF) to 9.  The higher the number the more output:
+  1 - names of functions at function-entry
+  2 - status/modus-texts
+  5 - detailed results of some functions
+  8 - names of all called system-functions out of loops
+  9 - names of all called system-functions in loops
+
+ "Set MESA_PALETTEMODE COLOR/COLORSHIFT/GREY/WEIGHTED"
+ WEIGHTED uses the original 189 colors for matching.
+ COLORSHIFT enables 255 color palette instead of 189, and enables fast
+colormatching (with shifts).
+ COLOR disables shift-match, but gives better quality.  (For example, the
+shift-match does not know white, but a bright blue)
+ GREY enables 64 grey-levels
+
+ "Set MESA_PENCACHE ON/OFF"
+ OFF disables caching of matches, ON enables it.  This is only valid for
+non-shift matches.  With this you could speed up the drawing between 1 and
+nearly infinite times (it does not slow down the matching times).
+
+ "Set MESA_PENDITHER ON/OFF"
+ OFF disables dithering, ON enables it.  This is only valid for
+non-shift matches.  With this you could improve the quality of drawing.

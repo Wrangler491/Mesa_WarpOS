@@ -1,0 +1,94 @@
+/*
+ * some notes for optimizing m68k-code in C:
+ *
+ ******
+ *
+ *  short int c;
+ *  for (c = n - 1; c >= 0; c--);
+ *
+ *  produces dbra
+ *
+ ******
+ *
+ *  int c;
+ *  for (c = n - 1; c >= 0; c--);
+ *
+ *  produces swap/dbra/swap/dbra
+ *  or dbra/dbra
+ *
+ ******
+ *
+ * some notes on the cpu:
+ *
+ *  asm: -(a0) is faster than (a0)+
+ *  C  : *--a  is faster than *a++
+ *
+ *  asm: add/sub doesn't matter
+ *  C  : a++/++a/a--/--a doesn't matter
+ *
+ ******
+ *
+ * fast linear-time integer log2
+ *
+ *  __inline extern int
+ * ilog2(int in)
+ * {
+ *   register int lg __asm__ ("d0");
+ *   register const int tt = 32;
+ * 
+ *   __asm ("bfffo	%1{#0,%2},%0
+ * 	sub%.l	%2,%0
+ * 	not%.l	%0"
+ * 	: "=d" (lg)
+ * 	: "m<>d" (in)
+ * 	, "d" (tt)
+ * 	: "cc");
+ *   return lg;
+ * }
+ */
+
+/*
+ * Note that you'll usually have to flip Y coordinates since Mesa's
+ * window coordinates start at the bottom and increase upward.  Most
+ * window system's Y-axis increases downward
+ *
+ * See dd.h for more device driver info.
+ * See the other device driver implementations for ideas.
+ *
+ */
+
+/*
+ * The Drawing area is defined by:
+ * 
+ * CC.Viewport.X = x;
+ * CC.Viewport.Width = width;
+ * CC.Viewport.Y = y;
+ * CC.Viewport.Height = height;
+ */
+
+/*
+ * Implementions of new drawing rutines:
+ * 
+ * you implement a own init for your rutines/hardware
+ * and make some test and calls it from AmigaMesaCreateContext()
+ * (look in the file src/amigamesa.c I'll thing you get it)
+ * Be sure to fill this three ponters out:
+ * void (*InitDD)( void );                                 // keep track of witch drawing rutines should be used
+ * void (*Dispose) (amigaMesaContext *c);  // Use this when AmigaMesaDestroyContext is called 
+ * void (*SwapBuffer) (void);                              // Use this when AmigaMesaSwapBuffers is called 
+ * where InitDD sets the DD structure in orginal mesa with pointers to drawing rutines
+ * Dispose is called when someone quits/closes down your made inits
+ * SwapBuffer is called when one is changing buffer in dubble buffering mode
+ * 
+ * Write nice drawing rutines like those in src/amigamesa.c on make sure
+ * that it's those you set in your InitDD rutine.
+ * 
+ * Add enum for your drawingmode for the taglist and if you need more tags also implement them
+ * If posible some autodetection code in AmigaMesaCreateContext
+ * Add enums and error codes if you neads 
+ * 
+ * PUT ALL YOUR NEADED DATA IN amigamesa_context->(void *)data in for your gfx driver
+ * private structure.
+ * 
+ * Send the code to me and I will include it in the main code.
+ */
