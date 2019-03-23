@@ -1,0 +1,82 @@
+# $Id: Makefile,v 3.3 1998/06/10 02:52:20 brianp Exp $
+
+# Mesa 3-D graphics library
+# Version:  3.0
+# Copyright (C) 1995-1998  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Makefile for GLUT-based demo programs for Unix/X11
+
+# $Log: Makefile,v $
+# Revision 3.3  1998/06/10 02:52:20  brianp
+# added multiext example
+#
+# Revision 3.2  1998/04/21 23:58:41  brianp
+# added LIBDIR variable
+#
+# Revision 3.1  1998/02/21 01:31:56  brianp
+# added multitex and renormal demos
+#
+# Revision 3.0  1998/02/14 18:30:39  brianp
+# initial rev
+#
+
+ROOT = ..
+
+##### MACROS #####
+
+## include-directory (replace by ${srcdir}/include later)
+INC_DIR = $(ROOT)/include
+
+## lib-directory (replace by ${srcdir}/lib later)
+LIB_DIR = $(ROOT)/lib
+
+## library dependencies
+LIB_DEP = $(LIB_DIR)/$(GLU_LIB).static
+
+## no libraries to build
+LIBS = $(LIB_DIR)/$(GLU_LIB).static
+
+## no dirs to recurse
+DIRS =
+
+## sources to process
+
+SRCS = glu.c mipmap.c nurbs.c nurbscrv.c nurbssrf.c nurbsutl.c	\
+	project.c quadric.c tess.c tess_clip.c tess_fist.c	\
+	tess_hash.c tess_heap.c tess_winding.c
+# polytest.c tesselat.c
+
+## programs to create
+PRGS = 
+
+# MASTER-CONFIG #
+
+include $(ROOT)/Make-config.AmigaOS
+
+##### RULES #####
+
+## implicit rule to make object-files
+%.o: %.c
+	$(CC) -c -I. -I$(INC_DIR) $(CFLAGS) $< -o $@
+%_p.o: %.c
+	$(CC) -c -I. -I$(INC_DIR) $(CFLAGS) $< -o $@
+%_f.o: %.c
+	$(CC) -c -I. -I$(INC_DIR) $(CFLAGS) $< -o $@ -DNDEBUG -DNODEBUG
+
+# Make the library
+$(LIB_DIR)/$(GLU_LIB).static: $(OBJS)
+	$(MAKELIB) $(GLU_LIB) $(MAJOR) $(MINOR) $^
