@@ -1,0 +1,170 @@
+# $Id: Makefile,v 3.3 1998/06/10 02:52:20 brianp Exp $
+
+# Mesa 3-D graphics library
+# Version:  3.1
+# Copyright (C) 1995-1998  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Makefile for GLUT-based demo programs for Unix/X11
+
+# $Log: Makefile,v $
+# Revision 3.3  1998/06/10 02:52:20  brianp
+# added multiext example
+#
+# Revision 3.2  1998/04/21 23:58:41  brianp
+# added LIBDIR variable
+#
+# Revision 3.1  1998/02/21 01:31:56  brianp
+# added multitex and renormal demos
+#
+# Revision 3.0  1998/02/14 18:30:39  brianp
+# initial rev
+#
+
+ROOT = ..
+
+##### MACROS #####
+
+## include-directory (replace by ${srcdir}/include later)
+INC_DIR = $(ROOT)/include
+
+## lib-directory (replace by ${srcdir}/lib later)
+LIB_DIR = $(ROOT)/lib
+
+## library dependencies
+LIB_DEP = $(LIB_DIR)/$(GL_LIB).static
+
+## no libraries to build
+LIBS = $(LIB_DIR)/$(GL_LIB).static
+
+## no dirs to recurse
+DIRS =
+
+## sources to process
+CORE_SOURCES =	accum.c \
+	alpha.c \
+	alphabuf.c \
+	api1.c \
+	api2.c \
+	apiext.c \
+	attrib.c \
+	bbox.c \
+	bitmap.c \
+	blend.c \
+	clip.c \
+	colortab.c \
+	config.c \
+	context.c \
+	copypix.c \
+	cva.c \
+	debug_xform.c \
+	depth.c \
+	dlist.c \
+	drawpix.c \
+	enable.c \
+	enums.c \
+	eval.c \
+	extensions.c \
+	feedback.c \
+	fog.c \
+	get.c \
+	hash.c \
+	image.c \
+	light.c \
+	lines.c \
+	logic.c \
+	masking.c \
+	matrix.c \
+	misc.c \
+	mmath.c \
+	mthreads.c \
+	pb.c \
+	pipeline.c \
+	pixel.c \
+	pointers.c \
+	points.c \
+	polygon.c \
+	quads.c \
+	rastpos.c \
+	readpix.c \
+	rect.c \
+	scissor.c \
+	shade.c \
+	span.c \
+	stages.c \
+	stencil.c \
+	teximage.c \
+	texobj.c \
+	texstate.c \
+	texture.c \
+	translate.c \
+	triangle.c \
+	varray.c \
+	vb.c \
+	vbcull.c \
+	vbfill.c \
+	vbindirect.c \
+	vbrender.c \
+	vbxform.c \
+	vector.c \
+	vertices.c \
+	winpos.c \
+	xform.c \
+	zoom.c \
+
+# references to CC:
+#  api1.c
+#  api2.c
+#  apiext.c
+#  context.c
+
+DRIVER_SOURCES = OSmesa/osmesa.c \
+	AOS/amesatools.c	\
+	AOS/cmnDisplay.c 	\
+	AOS/natDisplay.c 	\
+	AOS/cybDisplay.c	\
+	AOS/wrpDisplay.c	\
+	AOS/palettes.c 		\
+	AOS/mempools.c
+
+#	AOS/amigamesa.c 	\
+
+ASM_SOURCES = 
+SRCS = $(CORE_SOURCES) $(DRIVER_SOURCES) $(ASM_SOURCES)
+
+## programs to create
+PRGS = 
+
+# MASTER-CONFIG #
+
+include $(ROOT)/Make-config.AmigaOS
+
+##### RULES #####
+
+## implicit rule to make object-files
+%.c: %.E
+	$(CC) -E -I. -I.. -I$(INC_DIR) $(CFLAGS) -x c $< -o $@ -P -C
+#	@-indentT $@
+%.o: %.c
+	$(CC) -c -I. -I.. -I$(INC_DIR) $(CFLAGS) $< -o $@
+%_p.o: %.c
+	$(CC) -c -I. -I.. -I$(INC_DIR) $(CFLAGS) $< -o $@
+%_f.o: %.c
+	$(CC) -c -I. -I.. -I$(INC_DIR) $(CFLAGS) $< -o $@ -DNDEBUG -DNODEBUG
+
+# Make the library
+$(LIB_DIR)/$(GL_LIB).static: $(OBJS)
+	$(MAKELIB) $(GL_LIB) $(MAJOR) $(MINOR) $^
