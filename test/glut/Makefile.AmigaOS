@@ -1,0 +1,81 @@
+# $Id: Makefile,v 3.3 1998/06/10 02:52:20 brianp Exp $
+
+# Mesa 3-D graphics library
+# Version:  3.0
+# Copyright (C) 1995-1998  Brian Paul
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# Makefile for GLUT-based demo programs for Unix/X11
+
+# $Log: Makefile,v $
+# Revision 3.3  1998/06/10 02:52:20  brianp
+# added multiext example
+#
+# Revision 3.2  1998/04/21 23:58:41  brianp
+# added LIBDIR variable
+#
+# Revision 3.1  1998/02/21 01:31:56  brianp
+# added multitex and renormal demos
+#
+# Revision 3.0  1998/02/14 18:30:39  brianp
+# initial rev
+#
+
+ROOT = ../..
+
+##### MACROS #####
+
+## include-directory (replace by ${srcdir}/include later)
+INC_DIR = $(ROOT)/include
+
+## lib-directory (replace by ${srcdir}/lib later)
+LIB_DIR = $(ROOT)/lib
+
+## library dependencies
+LIB_DEP = 
+
+## no libraries to build
+LIBS = -L$(LIB_DIR) -L/gg/ppc-warpos/newlib/lib -L/gg/ppc-warpos/lib -lMesaGLut -lMesaGLu -lMesaGL -lcwos
+
+## no dirs to recurse
+DIRS = 
+
+## sources to process
+SRCS = bigtest.c test4.c test5.c test6.c test7.c test8.c test9.c timer_test.c \
+	cursor_test.c joy_test.c keyup_test.c menu_test.c over_test.c shape_test.c \
+	test1.c test10.c test11.c test12.c test13.c test14.c test15.c test16.c \
+	test17.c test18.c test19.c test2.c test20.c test21.c test22.c test23.c \
+	test24.c test25.c test26.c test27.c test28.c test3.c
+
+## programs to create
+PRGS = bigtest test4 test5 test6 test7 test8 test9 timer_test \
+	cursor_test joy_test keyup_test menu_test over_test shape_test \
+	test1 test10 test11 test12 test13 test14 test15 test16 \
+	test17 test18 test19 test2 test20 test21 test22 test23 \
+	test24 test25 test26 test27 test28 test3
+
+# MASTER-CONFIG #
+
+include $(ROOT)/Make-config.AmigaOS
+
+##### RULES #####
+
+## implicit rule to make object-files
+%$(O): %.c
+	$(CC) -I$(INC_DIR) $(CFLAGS) $< -s -c -o $@
+
+%: %$(O) $(PRG_DEP)
+	$(CC) -I. -I$(INC_DIR) $(CFLAGS) $< $(LIBS) -s -o $@
