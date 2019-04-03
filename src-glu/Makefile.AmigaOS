@@ -45,10 +45,10 @@ INC_DIR = $(ROOT)/include
 LIB_DIR = $(ROOT)/lib
 
 ## library dependencies
-LIB_DEP = $(LIB_DIR)/$(GLU_LIB).static
+LIB_DEP = $(LIB_DIR)/$(GLU_LIB)
 
 ## no libraries to build
-LIBS = $(LIB_DIR)/$(GLU_LIB).static
+LIBS = $(LIB_DIR)/$(GLU_LIB)
 
 ## no dirs to recurse
 DIRS =
@@ -78,5 +78,5 @@ include $(ROOT)/Make-config.AmigaOS
 	$(CC) -c -I. -I$(INC_DIR) $(CFLAGS) $< -o $@ -DNDEBUG -DNODEBUG
 
 # Make the library
-$(LIB_DIR)/$(GLU_LIB).static: $(OBJS)
-	$(MAKELIB) $(GLU_LIB) $(MAJOR) $(MINOR) $^
+$(LIB_DIR)/$(GLU_LIB): $(OBJS)
+	$(MAKELIB) $(GLU_LIB) $(MAJOR) $(MINOR) $(ROOT) $^
