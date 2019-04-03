@@ -29,13 +29,16 @@ shift 1
 MINOR=$1
 shift 1
 
+ROOT=$1
+shift 1
+
 OBJECTS=$*
 
 #--platform-------------------------------------------------------------
 
 /bin/ar rcv $LIBRARY $OBJECTS
 /bin/ranlib $LIBRARY
-#/bin/mv $LIBRARY /LINUX/aMesa/Mesa/lib
+/bin/mv $LIBRARY $ROOT/lib
 #cd /LINUX/aMesa/Mesa/lib
 #/bin/a2ixlibrary -32 $LIBRARY.data
 #/bin/mv $LIBRARY $LIBRARY.static
