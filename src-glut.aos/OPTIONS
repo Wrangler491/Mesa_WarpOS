@@ -1,0 +1,15 @@
+ There are some Variables you might set:
+
+ "Set GLUT_DEBUG ON/OFF <number>"
+ OFF disables output of information, ON enables it.  The number ranges from
+0 (OFF) to 9.  The higher the number the more output:
+  1 - names of functions at function-entry
+  2 - status/modus-texts
+  5 - detailed results of some functions
+  8 - names of all called system-functions out of loops
+  9 - names of all called system-functions in loops
+
+ "Set MESA_GLUTOVERWRITE <options>"
+ DOUBLE_ON/DOUBLE_OFF forces specific doublebuffer-mode
+ RGBA_ON/RGBA_OFF forces specific rgba-mode
+ STEREO_ON/STEREO_OFF forces specific stereo-mode
