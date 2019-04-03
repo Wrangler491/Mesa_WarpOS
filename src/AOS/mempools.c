@@ -55,24 +55,26 @@ APTR ReallocVecPooled(APTR poolHeader, APTR memoryBlock, ULONG byteSize) {
 //APTR AllocVecPooled(register APTR poolHeader __asm__("a0"), register ULONG byteSize __asm__("d0"))
 APTR AllocVecPooled(APTR poolHeader, ULONG byteSize)
 {
-  register ULONG *address;
+  /*register ULONG *address;
 
   byteSize += 4;
   if ((address = AllocPooled(poolHeader, byteSize)))
     *address++ = byteSize;
 
-  return (APTR)address;
+  return (APTR)address;*/
+	return (APTR)malloc(byteSize);
 }
 
 //void FreeVecPooled(register APTR poolHeader __asm__("a0"), register ULONG *memory __asm__("a1"))
 void FreeVecPooled(APTR poolHeader, ULONG *memory)
 {
-  register ULONG byteSize;
+  /*register ULONG byteSize;
 
   if (poolHeader && memory) {
     byteSize = *--memory;
     FreePooled(poolHeader, memory, byteSize);
-  }
+  }*/
+	free(memory);
 }
 
 /***************************************************************************************************************************/

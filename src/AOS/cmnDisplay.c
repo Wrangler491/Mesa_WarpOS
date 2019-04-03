@@ -23,6 +23,7 @@
  */
 
 #undef	NO_CONTEXT_AVAILABLE
+
 #include <AOS/amigamesa.h>
 #include "AOS/accessArray.h"
 
@@ -196,8 +197,9 @@ void cmnStandardSwapBuffer(amigaMesaContext amesa)
 #ifdef	AOS_WARP3D
   if (Warp3DBase)
     wrpStandardSwapBufferDB(amesa);
+  else {
 #endif
-  else if (amesa->rp != amesa->front_rp) {
+	if (amesa->rp != amesa->front_rp) {
     /* TODO: glLogicOp with minterms! */
     GLubyte minterm = 0xC0;
     struct gl_viewport_attrib *vport;
@@ -223,7 +225,10 @@ void cmnStandardSwapBuffer(amigaMesaContext amesa)
 	     vport->Width,
 	     vport->Height,							  /*  size  */
 	     minterm);
+	}
+#ifdef	AOS_WARP3D
   }
+#endif
 }
 
 void cmnStandardSwapBufferDB(amigaMesaContext amesa)
@@ -235,12 +240,13 @@ void cmnStandardSwapBufferDB(amigaMesaContext amesa)
   DEBUGOUT(1, "cmnStandardSwapBufferDB(0x%08x)\n", amesa);
 
   if (CyberGfxBase) {
+//#undef AOS_WARP3D
 #ifdef	AOS_WARP3D
     if (Warp3DBase)
       wrpStandardSwapBufferDB(amesa);
+    else {
 #endif
     /* TODO: check if WritePixelArray is faster than WriteChunkyPixels/WritePixelArray8 */
-    else {
       GLshort rowSize, rowFormat;
 
       if (amesa->depth <= 8) {
@@ -272,7 +278,9 @@ void cmnStandardSwapBufferDB(amigaMesaContext amesa)
 			vport->Width,
 			vport->Height,
 			rowFormat);
+#ifdef	AOS_WARP3D
     }
+#endif
   }
   else {
 #if 0

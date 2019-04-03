@@ -37,6 +37,9 @@
  *
  * basic os-dependent
  */
+#ifdef WARPOS
+#pragma pack(push,2)
+#endif
 #include <cybergraphx/cybergraphics.h>
 #include <Warp3D/Warp3D.h>
 #include <exec/memory.h>
@@ -44,6 +47,7 @@
 #include <hardware/blit.h>
 #include <intuition/intuition.h>
 #include <intuition/screens.h>
+#pragma pack(pop)
 
 #if 0
 /*
@@ -70,7 +74,7 @@
  *
  * inlines
  */
-#if 0
+#ifndef WARPOS
 #include <inline/cybergraphx.h>
 #include <inline/Warp3D.h>
 #include <inline/dos.h>
@@ -78,9 +82,17 @@
 #include <inline/graphics.h>
 #include <inline/intuition.h>
 #include <inline/utility.h>
-#endif
+#else
+#pragma pack(push,2)
 #include <proto/cybergraphics.h>
 #include <Warp3D/Warp3D_protos.h>
+#include <proto/dos.h>
+#include <proto/exec.h>
+#include <proto/graphics.h>
+#include <proto/intuition.h>
+#include <proto/utility.h>
+#pragma pack(pop)
+#endif
 
 /************************************************************************
  *
@@ -96,7 +108,7 @@
 #include "vb.h"
 
 #define	AOS_KERNEL
-#define	AOS_WARP3D
+//#define	AOS_WARP3D
 
 /*****************************************************************************
  *
@@ -284,14 +296,27 @@ struct amigamesa_context {
  *
  * private externals
  */
+#ifdef WARPOS
+#pragma pack(push,2)
+#endif
 #if defined(NO_CONTEXT_AVAILABLE) || defined(NO_CONTEXT_LIBRARIES)
 extern struct ExecBase *SysBase;
+extern struct Library *CyberGfxBase;
+#ifdef AOS_WARP3D
+extern struct Library *Warp3DBase;
+#endif
+
+#ifndef WARPOS
 extern struct Library *DOSBase;
 extern struct Library *GfxBase;
 extern struct Library *UtilityBase;
-extern struct Library *CyberGfxBase;
-extern struct Library *Warp3DBase;
+#else
+extern struct DosLibrary *DOSBase;
+extern struct GfxBase *GfxBase;
+extern struct UtilityBase *UtilityBase;
 #endif
+#endif
+#pragma pack(pop)
 
 //#define	TRYTEST	1
 extern struct presets {
@@ -365,7 +390,7 @@ extern APTR amesaPool;
  * debugging output
  */
 /* deactive debugging-output only on request */
-#if !defined(NDEBUG) && !defined(NODEBUG)
+//#if !defined(NDEBUG) && !defined(NODEBUG)
 extern LONG debugOutput;
 #include <stdio.h>
 #define DEBUGOUT(level,str,args...) ({	\
@@ -377,10 +402,10 @@ extern LONG debugOutput;
     fflush(stderr);			\
   }					\
 })
-#else
-#define DEBUGOUT(level,str,args...) ({})
-#define	DEBUGOUT_REMOVED
-#endif
+//#else
+//#define DEBUGOUT(level,str,args...) ({})
+//#define	DEBUGOUT_REMOVED
+//#endif
 
 #include <stdio.h>
 #define Error(str,args...) ({		\
