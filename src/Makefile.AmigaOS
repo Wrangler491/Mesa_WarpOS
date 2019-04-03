@@ -45,10 +45,10 @@ INC_DIR = $(ROOT)/include
 LIB_DIR = $(ROOT)/lib
 
 ## library dependencies
-LIB_DEP = $(LIB_DIR)/$(GL_LIB).static
+LIB_DEP = $(LIB_DIR)/$(GL_LIB)
 
 ## no libraries to build
-LIBS = $(LIB_DIR)/$(GL_LIB).static
+LIBS = $(LIB_DIR)/$(GL_LIB)
 
 ## no dirs to recurse
 DIRS =
@@ -133,14 +133,13 @@ CORE_SOURCES =	accum.c \
 
 DRIVER_SOURCES = OSmesa/osmesa.c \
 	AOS/amesatools.c	\
+	AOS/amigamesa.c 	\
 	AOS/cmnDisplay.c 	\
 	AOS/natDisplay.c 	\
 	AOS/cybDisplay.c	\
 	AOS/wrpDisplay.c	\
 	AOS/palettes.c 		\
 	AOS/mempools.c
-
-#	AOS/amigamesa.c 	\
 
 ASM_SOURCES = 
 SRCS = $(CORE_SOURCES) $(DRIVER_SOURCES) $(ASM_SOURCES)
@@ -166,5 +165,5 @@ include $(ROOT)/Make-config.AmigaOS
 	$(CC) -c -I. -I.. -I$(INC_DIR) $(CFLAGS) $< -o $@ -DNDEBUG -DNODEBUG
 
 # Make the library
-$(LIB_DIR)/$(GL_LIB).static: $(OBJS)
-	$(MAKELIB) $(GL_LIB) $(MAJOR) $(MINOR) $^
+$(LIB_DIR)/$(GL_LIB): $(OBJS)
+	$(MAKELIB) $(GL_LIB) $(MAJOR) $(MINOR) $(ROOT) $^
