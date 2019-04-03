@@ -57,7 +57,8 @@ void natWriteCI32Span(const GLcontext * ctx, GLuint n, GLint x, GLint y,
     else {
       if (ant) {
 	DEBUGOUT(9, "  MyWritePixelLine8(%d, %d, %d)\n", ant, x, y);
-	MyWritePixelLine8(rp, x, y, ant, il = amesa->imageline, amesa->temprp);
+	il = amesa->imageline;
+	MyWritePixelLine8(rp, x, y, ant, il, amesa->temprp);
 	x += ant;
 	ant = 0;
       }
@@ -99,7 +100,8 @@ void natWriteCI8Span(const GLcontext * ctx, GLuint n, GLint x, GLint y,
     else {
       if (ant) {
 	DEBUGOUT(9, "  MyWritePixelLine8(%d, %d, %d)\n", n, x, y);
-	MyWritePixelLine8(rp, x, y, ant, il = amesa->imageline, amesa->temprp);
+	il = amesa->imageline;
+	MyWritePixelLine8(rp, x, y, ant, il, amesa->temprp);
 	x += ant;
 	ant = 0;
       }

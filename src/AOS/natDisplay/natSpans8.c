@@ -48,7 +48,8 @@ void nat8WriteRGBASpan(const GLcontext * ctx, GLuint n, GLint x, GLint y,
     for (s = n - 1; s >= 0; s--, RGBAi++)					/*  draw pixel (x[i],y[i]) */
       *il++ = PL8_RGBA(amesa, *RGBAb0, *RGBAb1, *RGBAb2);			/* clear rgb? */
     DEBUGOUT(8, "  MyWritePixelLine8(%d, %d, %d)\n", n, x, y);
-    MyWritePixelLine8(rp, x, y, n, il = amesa->imageline, amesa->temprp);
+	il = amesa->imageline;
+    MyWritePixelLine8(rp, x, y, n, il, amesa->temprp);
   }
   else {
     GLshort i, ant = 0;
@@ -62,7 +63,8 @@ void nat8WriteRGBASpan(const GLcontext * ctx, GLuint n, GLint x, GLint y,
       else {
 	if (ant) {
 	  DEBUGOUT(9, "  MyWritePixelLine8(%d, %d, %d)\n", ant, x, y);
-	  MyWritePixelLine8(rp, x, y, ant, il = amesa->imageline, amesa->temprp);
+	  il = amesa->imageline;
+	  MyWritePixelLine8(rp, x, y, ant, il, amesa->temprp);
 	  x += ant;
 	  ant = 0;
 	}
@@ -100,7 +102,8 @@ void nat8WriteRGBSpan(const GLcontext * ctx, GLuint n, GLint x, GLint y,
     for (s = n - 1; s >= 0; s--, RGBb++,RGBb++,RGBb++)	//was RGBb+=3
       *il++ = PL8_RGBA(amesa, *RGBb0, *RGBb1, *RGBb2);				/* clear rgb? */
     DEBUGOUT(8, "  MyWritePixelLine8(%d, %d, %d)\n", n, x, y);
-    MyWritePixelLine8(rp, x, y, n, il = amesa->imageline, amesa->temprp);
+	il = amesa->imageline;
+    MyWritePixelLine8(rp, x, y, n, il, amesa->temprp);
   }
   else {
     GLshort i, ant = 0;
@@ -114,7 +117,8 @@ void nat8WriteRGBSpan(const GLcontext * ctx, GLuint n, GLint x, GLint y,
       else {
 	if (ant) {
 	  DEBUGOUT(9, "  MyWritePixelLine8(%d, %d, %d)\n", ant, x, y);
-	  MyWritePixelLine8(rp, x, y, ant, il = amesa->imageline, amesa->temprp);
+	  il = amesa->imageline;
+	  MyWritePixelLine8(rp, x, y, ant,  il, amesa->temprp);
 	  x += ant;
 	  ant = 0;
 	}
