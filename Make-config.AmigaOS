@@ -19,7 +19,7 @@ OBJS = $(OBJ4:.cpp=$(O))
 
 WARN = -w ##-Wall -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
 PROC = --specs=warpup -woslibs #-m68030 -m68881
-OPTI = -O2
+OPTI = -O2 -DWARPOS -D__PPC__
 MORE = #-fgcse -fregmove -fno-float-store -fno-function-cse -fpeephole	\
 	#-ffast-math -fomit-frame-pointer -fstrength-reduce		\
 	#-frerun-cse-after-loop -frerun-loop-opt -fschedule-insns	\
@@ -28,7 +28,8 @@ MORE = #-fgcse -fregmove -fno-float-store -fno-function-cse -fpeephole	\
 
 ## specify $(LIB_DIR)/$(LIB_DEP)
 
-LIB_LINK = -L$(LIB_DIR) $(subst .a.static,,$(subst $(LIB_DIR)/lib,-l,$(LIB_DEP)))
+LIB_LINK = -L$(LIB_DIR)/$(LIB_DEP)
+# $(subst .a,,$(subst $(LIB_DIR)/lib,-l,$(LIB_DEP)))
 
 ##### TARGETS #####
 ## specify $(DIRS)/$(MAKEFILE)
@@ -185,6 +186,7 @@ wos:
 	$(MAKE) -f Makefile.AmigaOS targets		\
 	"GL_LIB = libMesaGL.a"				\
 	"GLU_LIB = libMesaGLu.a"			\
+	"GLUT_LIB = libMesaGLut.a"			\
 	"CC = gcc"					\
 	"CXX = g++"					\
 	"CFLAGS = $(OPTI) $(PROC) $(WARN) $(MORE)"	\

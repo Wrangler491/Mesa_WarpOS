@@ -89,5 +89,8 @@ amigaos amigaos-prof amigaos-depend amigaos-lclint:
 wos:
 	@-mkdir -p lib
 	@-mkdir -p bin
-	if [ -d src ]            ; then cd src              ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS
-	if [ -d src-glu ]        ; then cd src-glu          ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	
+	if [ -d src ]            ; then cd src              ; $(MAKE) -r -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa CVS
+	if [ -d src-glu ]        ; then cd src-glu          ; $(MAKE) -r -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	
+	if [ -d src-glut.aos ]   ; then cd src-glut.aos     ; $(MAKE) -r -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# MesaGLut 1.0 (amiga)
+	if [ -d test ]            ; then cd test              ; $(MAKE) -kir -f Makefile.AmigaOS $@ -$(MAKEFLAGS) ; fi	# Mesa tests
+
