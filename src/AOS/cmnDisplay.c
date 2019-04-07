@@ -523,15 +523,21 @@ GLboolean cmnStandardInit(amigaMesaContext amesa, struct TagItem *tagList)
 
   if ((amesa->left = GetTagData(AMA_Left, amesa->left, tagList)) < 0)
     return GL_FALSE;
+  DEBUGOUT(10, "cmnStandardInit(left: %d)\n", amesa->left);
   if ((amesa->right = GetTagData(AMA_Right, amesa->right, tagList)) < 0)
     return GL_FALSE;
+  DEBUGOUT(10, "cmnStandardInit(right: %d)\n", amesa->right);
   if ((amesa->top = GetTagData(AMA_Top, amesa->top, tagList)) < 0)
     return GL_FALSE;
+  DEBUGOUT(10, "cmnStandardInit(top: %d)\n", amesa->top);
   if ((amesa->bottom = GetTagData(AMA_Bottom, amesa->bottom, tagList)) < 0)
     return GL_FALSE;
+  DEBUGOUT(10, "cmnStandardInit(bottom: %d)\n", amesa->bottom);
+  DEBUGOUT(10, "cmnStandardInit screen ptr: 0x%08x\n",amesa->Screen);
 
   if (!(amesa->window = (struct Window *)GetTagData(AMA_Window, (ULONG)amesa->window, tagList))) {
-    if (!(amesa->Screen = (struct Screen *)GetTagData(AMA_Screen, (ULONG)amesa->Screen, tagList))) {
+	DEBUGOUT(10, "cmnStandardInit no window found\n");
+	  if (!(amesa->Screen = (struct Screen *)GetTagData(AMA_Screen, (ULONG)amesa->Screen, tagList))) {
       DEBUGOUT(0, "cmnStandardInit: missing screen\n");
       LastError = AMESA_SCREEN_TAG_MISSING;
       return (GL_FALSE);
@@ -542,7 +548,8 @@ GLboolean cmnStandardInit(amigaMesaContext amesa, struct TagItem *tagList)
       return (GL_FALSE);
     }
   }
-  else {
+  else {	//if there is a window then use its parameters to populate amesa
+	  	DEBUGOUT(10, "cmnStandardInit window found: 0x%08x\n", amesa->window);
     amesa->rp = amesa->window->RPort;
     amesa->Screen = amesa->window->WScreen;
 
@@ -555,9 +562,13 @@ GLboolean cmnStandardInit(amigaMesaContext amesa, struct TagItem *tagList)
     if (amesa->bottom < amesa->window->BorderBottom)
       amesa->bottom = amesa->window->BorderBottom;
   }
+    DEBUGOUT(10, "cmnStandardInit has set LRTB, RP, Screen: 0x%08x, rp: 0x%08x\n",amesa->Screen,amesa->rp);
 
 	newModeID = GetVPModeID(&amesa->Screen->ViewPort);
-  if (CyberGfxBase && IsCyberModeID(newModeID)) {
+	    DEBUGOUT(10, "cmnStandardInit phase 1, newModeID: %d\n",newModeID);
+  if (CyberGfxBase){
+	  DEBUGOUT(10, "cmnStandardInit phase 1.5\n");
+	  if(IsCyberModeID(newModeID)) {
 #ifdef	AOS_WARP3D
     if (Warp3DBase) {
       W3D_Driver *checkMode;
@@ -585,19 +596,25 @@ GLboolean cmnStandardInit(amigaMesaContext amesa, struct TagItem *tagList)
       }
     }
 #endif
-
+		    DEBUGOUT(10, "cmnStandardInit phase 2\n");
     amesa->depth = GetCyberMapAttr(amesa->rp->BitMap, CYBRMATTR_DEPTH);
-  }
+	    DEBUGOUT(10, "cmnStandardInit has found a CGX Screen\n");
+	  }
+	  else
+		amesa->depth = GetBitMapAttr(amesa->rp->BitMap, BMA_DEPTH);
+  }	//if CyberGfxBase
   else
     amesa->depth = GetBitMapAttr(amesa->rp->BitMap, BMA_DEPTH);
-
+  	    DEBUGOUT(10, "cmnStandardInit phase 3, depth: %d\n",amesa->depth);
   amesa->RealWidth = 
   amesa->FixedWidth = LayerWidth(amesa->rp->Layer);
   amesa->RealHeight = 
   amesa->FixedHeight = LayerHeight(amesa->rp->Layer);
+  		    DEBUGOUT(10, "cmnStandardInit phase 3.5 RW: %d, RH: %d\n",amesa->RealWidth,amesa->RealHeight);
 
   if ((amesa->width = GetTagData(AMA_Width, amesa->RealWidth - amesa->left - amesa->right, tagList)) < 0)
     return GL_FALSE;
+  		    DEBUGOUT(10, "cmnStandardInit phase 4\n");
   if ((amesa->height = GetTagData(AMA_Height, amesa->RealHeight - amesa->bottom - amesa->top, tagList)) < 0)
     return GL_FALSE;
 
@@ -608,6 +625,7 @@ GLboolean cmnStandardInit(amigaMesaContext amesa, struct TagItem *tagList)
 
   amesa->front_rp = amesa->rp;
   amesa->back_rp = NULL;
+      DEBUGOUT(10, "cmnStandardInit has set RWFW, RHFH, WH, FrontRP, BackFP\n");
 /*amesa->rp = amesa->front_rp; */
 
 /*amesa->gl_ctx->BufferWidth = amesa->width; */
@@ -688,6 +706,9 @@ GLboolean cmnStandardInit(amigaMesaContext amesa, struct TagItem *tagList)
   amesa->InitDD = amesa->depth <= 8 ? natStandardDDPointers : cybStandardDDPointers;	/*  standard drawing */
   amesa->Dispose = cmnStandardDispose;
   amesa->SwapBuffer = cmnStandardSwapBuffer;
+
+      DEBUGOUT(10, "cmnStandardInit has set pix, clearpic, InitDD, Dispose, SwapBuffer\n");
+
   (*amesa->InitDD) (amesa->gl_ctx);
 
   DEBUGOUT(1, " amesa->RealWidth   = %d\n", amesa->RealWidth);

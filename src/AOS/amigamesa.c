@@ -121,6 +121,7 @@
 
 #include <AOS/amigamesa.h>
 
+
 /**********************************************************************/
 /*****                Internal Data                               *****/
 /**********************************************************************/
@@ -145,6 +146,10 @@ LONG debugOutput = 100;
 //#endif
 int trueColor = 0;
 BOOL tryCached = GL_FALSE;
+
+#define MAXTAGS 100
+long tagStore[MAXTAGS*2]={0};
+
 
 /**********************************************************************/
 /*****                Some Usefull code                           *****/
@@ -181,7 +186,11 @@ void glConstructor(void)
     printf("Can't open utility.library version 39\n");
     exit(10);
   }
+#ifdef WARPOS
+  if (!(amesaPool = CreatePool(MEMF_PUBLIC, 65536, 32768))) {
+#else
   if (!(amesaPool = CreatePool(MEMF_ANY, 65536, 32768))) {
+#endif
     printf("Can't create mempools for amesa\n");
     exit(10);
   }
@@ -259,6 +268,9 @@ void glDestructor(void)
   }
 }
 
+  __asm__ (".section .init \n .long glConstructor, 340 \n .section .text\n");
+  __asm__ (".section .fini \n .long glDestructor, 340 \n .section .text\n");
+
 #if 0
 asm("	.text; 	.stabs \"___CTOR_LIST__\",22,0,0,_constructor");
 asm("	.text; 	.stabs \"___DTOR_LIST__\",22,0,0,_destructor");
@@ -297,6 +309,7 @@ void amigaMesaSetOneColor(struct amigamesa_context *amesa, GLuint index, GLfloat
 
 struct amigamesa_visual *amigaMesaCreateVisualTags(long Tag1,...)
 {
+	printf("amigaMesaCreateVisualTags not supported!\n");
   return amigaMesaCreateVisual((struct TagItem *)&Tag1);
 }
 
@@ -313,6 +326,7 @@ struct amigamesa_visual *amigaMesaCreateVisual(struct TagItem *tagList)
     LastError = AMESA_OUT_OF_MEM;
     return NULL;
   }
+  DEBUGOUT(10, "amigaMesaCreateVisual(visual struct: 0x%08x)\n", v);
   bzero(v, sizeof(struct amigamesa_visual));
 
   if (GetTagData(AMA_RGBMode, 0xDEAD, tagList) == 0xDEAD) {
@@ -324,6 +338,9 @@ struct amigamesa_visual *amigaMesaCreateVisual(struct TagItem *tagList)
       actScreen = (struct Screen *)GetTagData(AMA_Screen, NULL, tagList);
       actRPort = (struct RastPort *)GetTagData(AMA_RastPort, NULL, tagList);
     }
+	DEBUGOUT(10, "amigaMesaCreateVisual(Window struct: 0x%08x)\n", actWindow);
+	DEBUGOUT(10, "amigaMesaCreateVisual(Screen struct: 0x%08x)\n", actScreen);
+	DEBUGOUT(10, "amigaMesaCreateVisual(RPort struct: 0x%08x)\n", actRPort);
 
     if (actRPort) {
       if ((CyberGfxBase) && (GetCyberMapAttr(actRPort->BitMap, CYBRMATTR_ISCYBERGFX) == TRUE)) {
@@ -337,6 +354,7 @@ struct amigamesa_visual *amigaMesaCreateVisual(struct TagItem *tagList)
 	  case PIXFMT_LUT8:
 	    index_bits = pixDpt;
 	    v->flags &= ~VISUAL_ALPHACHANNEL;	//GL_FALSE;
+		// set rbits,gbits,bbits to 0?
 	    break;
 	  case PIXFMT_RGB15:
 	  case PIXFMT_BGR15:
@@ -366,22 +384,25 @@ struct amigamesa_visual *amigaMesaCreateVisual(struct TagItem *tagList)
 		v->flags |= VISUAL_ALPHACHANNEL;	//GL_TRUE;
 	    break;
 	}
-      }
+      } //is a cgx rastport
       else {
 	index_bits = GetBitMapAttr(actRPort->BitMap, BMA_DEPTH);
 	rbits = gbits = bbits = abits = 0;
-      }
-    }
-  }
+      } //end of checking cgx rastport
+    } //end of if actRport
+  } //end of if AMA_RGBMode not in tagList
   else if (GetTagData(AMA_RGBMode, 0xDEAD, tagList) == GL_FALSE) {
+	  	   DEBUGOUT(10, "amigaMesaCreateVisual(AMA_RGBMode == GL_FALSE)\n");
     if ((actRPort = (struct RastPort *)GetTagData(AMA_RastPort, NULL, tagList)))
       index_bits = GetBitMapAttr(actRPort->BitMap, BMA_DEPTH);
     else
       index_bits = 8;
 
     rbits = gbits = bbits = abits = 0;
-  }
+  }  //end of AMA_RGBMode == GL_FALSE
   else {
+	  //ie AMA_RGBMode == GL_TRUE and by implication assumed to be 24 bit, no alpha chann
+	  DEBUGOUT(10, "amigaMesaCreateVisual(AMA_RGBMode == GL_TRUE)\n");
   }
 
   /*
@@ -426,6 +447,13 @@ struct amigamesa_visual *amigaMesaCreateVisual(struct TagItem *tagList)
 				  ACCUM_BITS,			/*  accum_size  */
 				  index_bits,
 				  rbits, gbits, bbits, abits);
+
+  //fill in other fields
+  v->depthBits = DEPTH_BITS;
+  v->accumBits = ACCUM_BITS;
+  v->stencilBits = STENCIL_BITS;
+  v->depth = index_bits ? index_bits : (rbits + gbits + bbits + abits);
+
   return v;
 }
 
@@ -438,6 +466,7 @@ void amigaMesaDestroyVisual(struct amigamesa_visual *v)
 
 enum AMesaChanged amigaMesaChangeVisualTags(struct amigamesa_visual *v, long Tag1,...)
 {
+	printf("amigaMesaChangeVisualTags not supported!\n");
 	return amigaMesaChangeVisual(v, (struct TagItem *)&Tag1);
 }
 
@@ -449,6 +478,7 @@ enum AMesaChanged amigaMesaChangeVisual(struct amigamesa_visual *v, struct TagIt
 
 void amigaMesaGetVisualTags(struct amigamesa_visual *v, long Tag1,...)
 {
+	printf("amigaMesaGetVisualTags not supported!\n");
 	return amigaMesaChangeVisual(v, (struct TagItem *)&Tag1);
 }
 
@@ -461,6 +491,7 @@ void amigaMesaGetVisual(struct amigamesa_visual *v, struct TagItem *tagList)
 /*****************************************************************************/
 struct amigamesa_buffer *amigaMesaCreateBufferTags(struct amigamesa_visual *visual, long Tag1,...)
 {
+	printf("amigaMesaCreateBufferTags not supported!\n");
   return amigaMesaCreateBuffer(visual, (struct TagItem *)&Tag1);
 }
 
@@ -475,9 +506,9 @@ struct amigamesa_buffer *amigaMesaCreateBuffer(struct amigamesa_visual *visual, 
     bzero(b, sizeof(struct amigamesa_buffer));
     b->gl_buffer = gl_create_framebuffer(visual->gl_visual);
     /* other stuff */
-	//SetTagData(AMA_Buffer, b, tagList); set buffer ptr
+	b->attachedWindowID = (GLint)GetTagData(AMA_WindowID, 1, tagList);	//set WindowID, default = 1
   }
-
+    DEBUGOUT(10, "amigaMesaCreateBuffer(buffer struct: 0x%08x)\n", b);
   return b;
 }
 
@@ -489,6 +520,7 @@ void amigaMesaDestroyBuffer(struct amigamesa_buffer *b)
 
 enum AMesaChanged amigaMesaChangeBufferTags(struct amigamesa_buffer *b, long Tag1,...)
 {
+	printf("amigaMesaChangeBufferTags not supported!\n");
 	return amigaMesaChangeBuffer(b, (struct TagItem *)&Tag1);
 }
 
@@ -500,6 +532,7 @@ enum AMesaChanged amigaMesaChangeBuffer(struct amigamesa_buffer *b, struct TagIt
 
 void amigaMesaGetBufferTags(struct amigamesa_buffer *b, long Tag1,...)
 {
+	printf("amigaMesaGetBufferTags not supported!\n");
 	return amigaMesaChangeBuffer(b, (struct TagItem *)&Tag1);
 }
 
@@ -513,7 +546,30 @@ void amigaMesaGetBuffer(struct amigamesa_buffer *b, struct TagItem *tagList)
 
 struct amigamesa_context *amigaMesaCreateContextTags(long Tag1,...)
 {
-  return amigaMesaCreateContext((struct TagItem *)&Tag1);
+	va_list tagList;
+	int n;
+	ULONG val1, val2;
+	
+	va_start (tagList, Tag1);
+	val1 = Tag1;
+	tagStore[0] = val1;
+
+	for(n=1;n<MAXTAGS*2;n+=2) {
+		if(val1==TAG_END)
+			break;
+		val2 = va_arg(tagList, long);
+		val1 = va_arg(tagList, long);
+		tagStore[n] = val2;
+		tagStore[n+1] = val1;
+	}
+
+	va_end(tagList);
+	if(val1!=TAG_END) {
+		printf("Max Tags exceeded!\n");
+	}
+
+	return amigaMesaCreateContext((struct TagItem *)tagStore);
+  //return amigaMesaCreateContext((struct TagItem *)&Tag1);
 }
 
 struct amigamesa_context *amigaMesaCreateContext(struct TagItem *tagList)
@@ -534,6 +590,7 @@ struct amigamesa_context *amigaMesaCreateContext(struct TagItem *tagList)
     return (NULL);
   }
   bzero(amesa, sizeof(struct amigamesa_context));
+    DEBUGOUT(10, "amigaMesaCreateContext(context struct: 0x%08x)\n", amesa);
 
   amesa->visual = (struct amigamesa_visual *)GetTagData(AMA_Visual, NULL, tagList);
   amesa->buffer = (struct amigamesa_buffer *)GetTagData(AMA_Buffer, NULL, tagList);
@@ -544,6 +601,7 @@ struct amigamesa_context *amigaMesaCreateContext(struct TagItem *tagList)
       LastError = AMESA_OUT_OF_MEM;
       return NULL;
     }
+	amesa->visual->context = amesa;	//fill in bound context - query do this for provided visuals?
     amesa->flags |= RESOURCE_VISUAL;
   }
 
@@ -552,6 +610,7 @@ struct amigamesa_context *amigaMesaCreateContext(struct TagItem *tagList)
       LastError = AMESA_OUT_OF_MEM;
       return NULL;
     }
+	amesa->buffer->context = amesa;	//fill in bound context - query do this for provided buffers?
     amesa->flags |= RESOURCE_BUFFER;
   }
 
@@ -577,8 +636,11 @@ struct amigamesa_context *amigaMesaCreateContext(struct TagItem *tagList)
 	Init = cmnStandardInit;
 
   if (!(*Init)(amesa, tagList)) {
+	    DEBUGOUT(10, "AmigaMesaCreateContext: cmnStandardInit returned GL_FALSE\n");
     amigaMesaDestroyContext(amesa);
     amesa = NULL;
+  } else {
+	  	    DEBUGOUT(10, "AmigaMesaCreateContext: cmnStandardInit returned GL_TRUE\n");
   }
 
   return amesa;
@@ -605,39 +667,81 @@ void amigaMesaDestroyContext(struct amigamesa_context *amesa)
 
 enum AMesaChanged amigaMesaChangeContextTags(struct amigamesa_context *amesa, long Tag1,...)
 {
-	return amigaMesaChangeContext(amesa, (struct TagItem *)&Tag1);
+	va_list tagList;
+	int n;
+	ULONG val1, val2;
+	
+	va_start (tagList, Tag1);
+	val1 = Tag1;
+	tagStore[0] = val1;
+
+	for(n=1;n<MAXTAGS*2;n+=2) {
+		if(val1==TAG_END)
+			break;
+		val2 = va_arg(tagList, long);
+		val1 = va_arg(tagList, long);
+		tagStore[n] = val2;
+		tagStore[n+1] = val1;
+	}
+
+	va_end(tagList);
+	if(val1!=TAG_END) {
+		printf("Max Tags exceeded!\n");
+	}
+
+	return amigaMesaChangeContext(amesa, (struct TagItem *)tagStore);
+
+	//return amigaMesaChangeContext(amesa, (struct TagItem *)&Tag1);
 }
 
 enum AMesaChanged amigaMesaChangeContext(struct amigamesa_context *amesa, struct TagItem *tagList)
 {
+	DEBUGOUT(10, "Entered amigaMesaChangeContext\n");
 	if (GetTagData(AMA_PaletteMode, 0xDEAD, tagList) != 0xDEAD) {
 		amesa->trueColor = tagList->ti_Data;
+		DEBUGOUT(10, "amigaMesaChangeContext: changed PaletteMode to 0x%x\n",tagList->ti_Data);
 	}
 
 	if (GetTagData(AMA_PaletteCache, 0xDEAD, tagList) != 0xDEAD) {
 		if(tagList->ti_Data == GL_TRUE) {
 			amesa->flags |= PALETTE_CACHE;
+			DEBUGOUT(10, "amigaMesaChangeContext: PaletteCache ON\n");
 		} else {
 			amesa->flags &= ~PALETTE_CACHE;
+			DEBUGOUT(10, "amigaMesaChangeContext: PaletteCache OFF\n");
 		}
 	}
 
 	if (GetTagData(AMA_PaletteDither, 0xDEAD, tagList) != 0xDEAD) {
 		if(tagList->ti_Data == GL_TRUE) {
 			amesa->flags |= PALETTE_DITHER;
+			DEBUGOUT(10, "amigaMesaChangeContext: PaletteDither ON\n");
 		} else {
 			amesa->flags &= ~PALETTE_DITHER;
+			DEBUGOUT(10, "amigaMesaChangeContext: PaletteDither OFF\n");
 		}
 	}
 
 	return AMESA_CONTEXT;
 }
 
-void amigaMesaGetContextTags(struct amigamesa_context *amesa, long Tag1,...)
+void amigaMesaGetContextTags(struct amigamesa_context *amesa, long Tag1, ulong *Tag1val, long Tag2)
 {
-	return amigaMesaGetContext(amesa, (struct TagItem *)&Tag1);
+	DEBUGOUT(10, "Entered amigaGetContextTags\n");
+	if(Tag2!=TAG_DONE) {
+		printf("Too many tags in amigaMesaGetContextTags!\n");
+		return;
+	}
+	if(Tag1!=AMA_Buffer) {
+		printf("Invalid tags in amigaMesaGetContextTags!\n");
+		return;
+	}
+	*Tag1val = amesa->buffer;
+	return;
+	//return amigaMesaGetContext(amesa, (struct TagItem *)&Tag1);
 }
 
+/*
 void amigaMesaGetContext(struct amigamesa_context *amesa, struct TagItem *tagList)
 {
 	if (GetTagData(AMA_Buffer, 0xDEAD, tagList) != 0xDEAD) {
@@ -645,6 +749,7 @@ void amigaMesaGetContext(struct amigamesa_context *amesa, struct TagItem *tagLis
 	}
 	return;
 }
+*/
 
 /*****************************************************************************/
 

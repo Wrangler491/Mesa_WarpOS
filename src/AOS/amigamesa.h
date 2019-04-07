@@ -47,7 +47,9 @@
 #include <hardware/blit.h>
 #include <intuition/intuition.h>
 #include <intuition/screens.h>
+#ifdef WARPOS
 #pragma pack(pop)
+#endif
 
 #if 0
 /*
@@ -314,9 +316,9 @@ extern struct Library *UtilityBase;
 extern struct DosLibrary *DOSBase;
 extern struct GfxBase *GfxBase;
 extern struct UtilityBase *UtilityBase;
-#endif
-#endif
 #pragma pack(pop)
+#endif
+#endif
 
 //#define	TRYTEST	1
 extern struct presets {
