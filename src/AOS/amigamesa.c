@@ -142,7 +142,7 @@ struct UtilityBase *UtilityBase = NULL;
 #endif
 APTR amesaPool = NULL;
 //#if !defined(NDEBUG) && !defined(NODEBUG)
-LONG debugOutput = 100;
+LONG debugOutput = 0;
 //#endif
 int trueColor = 0;
 BOOL tryCached = GL_FALSE;
@@ -725,7 +725,7 @@ enum AMesaChanged amigaMesaChangeContext(struct amigamesa_context *amesa, struct
 	return AMESA_CONTEXT;
 }
 
-void amigaMesaGetContextTags(struct amigamesa_context *amesa, long Tag1, ulong *Tag1val, long Tag2)
+void amigaMesaGetContextTags(struct amigamesa_context *amesa, long Tag1, ULONG *Tag1val, long Tag2)
 {
 	DEBUGOUT(10, "Entered amigaGetContextTags\n");
 	if(Tag2!=TAG_DONE) {
