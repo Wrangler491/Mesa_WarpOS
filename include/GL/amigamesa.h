@@ -170,8 +170,9 @@ extern "C" {
   enum AMesaChanged amigaMesaChangeContextTags(amigaMesaContext, long Tag1,...);
   enum AMesaChanged amigaMesaChangeContext(amigaMesaContext, struct TagItem *);
 
-  void amigaMesaGetContextTags(amigaMesaContext, long Tag1,...);
-  void amigaMesaGetContext(amigaMesaContext, struct TagItem *);
+  //void amigaMesaGetContextTags(amigaMesaContext, long Tag1,...);
+  //void amigaMesaGetContext(amigaMesaContext, struct TagItem *);
+  void amigaMesaGetContextTags(amigaMesaContext, long Tag1, ULONG *Tag1val, long Tag2);
 
   /* misc */
   void amigaMesaSetOneColor(amigaMesaContext, GLuint, GLfloat r, GLfloat g, GLfloat b);
