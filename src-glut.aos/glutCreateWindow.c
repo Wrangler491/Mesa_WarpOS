@@ -39,14 +39,15 @@
 #include <inline/intuition.h>
 #include <inline/gadtools.h>
 #include <inline/layers.h>
+#include <libraries/gadtools.h>
 #else
 #pragma pack(push,2)
 #include <proto/intuition.h>
 #include <proto/gadtools.h>
 #include <proto/layers.h>
-#endif
 #include <libraries/gadtools.h>
 #pragma pack(pop)
+#endif
 #include <GL/amigamesa.h>
 #include "glutstuff.h"
 
@@ -89,7 +90,7 @@ int glutCreateWindow(const char *title)
 {
   struct GlutWindow *gw;
 
-  if ((gw = AllocVecPooled(glutPool, sizeof(struct GlutWindow)))) {	//was AllocVecPooled
+  if ((gw = AllocVecPooled(glutPool, sizeof(struct GlutWindow)))) {
     struct Window *win;
     struct Screen *screen;
     WORD zoom[4];
@@ -170,6 +171,7 @@ int glutCreateWindow(const char *title)
 	  gw->needrightmenu = TRUE;
 
 	  stuffLinkInWin(gw);
+	  DEBUGOUT(10, "glutCreateWindow about to call glEnable\n");
 
 	  if (glutstuff.depth)
 	    glEnable(GL_DEPTH_TEST);

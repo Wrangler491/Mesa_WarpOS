@@ -41,6 +41,7 @@
 #include <inline/graphics.h>
 #include <inline/layers.h>
 #include <inline/intuition.h>
+#include <exec/memory.h>
 #else
 #pragma pack(push,2)
 #include <proto/dos.h>
@@ -48,9 +49,9 @@
 #include <proto/graphics.h>
 #include <proto/layers.h>
 #include <proto/intuition.h>
-#endif
 #include <exec/memory.h>
 #pragma pack(pop)
+#endif
 #include "glutstuff.h"
 
 #ifdef WARPOS
@@ -113,7 +114,11 @@ void glutConstructor(void)
     Printf("Can't open layers.library version 39\n");
     exit(10);
   }
+#ifdef WARPOS
+  if (!(glutPool = CreatePool(MEMF_PUBLIC | MEMF_CLEAR, 65536, 32768))) {
+#else
   if (!(glutPool = CreatePool(MEMF_ANY | MEMF_CLEAR, 65536, 32768))) {
+#endif
     Printf("Can't create mempools for glut\n");
     exit(10);
   }
@@ -257,7 +262,7 @@ void stuffMakeCurrent(struct GlutWindow *gw)
     if (gw->context) {
       amigaMesaBuffer buffer = NULL;
 
-      amigaMesaGetContextTags(gw->context, AMA_Buffer, &buffer, TAG_DONE, 0);
+      amigaMesaGetContextTags(gw->context, AMA_Buffer, &buffer, TAG_DONE);
       if (buffer)
         amigaMesaMakeCurrent(gw->context, buffer);
     }
