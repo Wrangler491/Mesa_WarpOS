@@ -52,13 +52,17 @@ struct IntuitionBase *IntuitionBase;
 #endif
 struct Screen *screen;
 struct Window *window;
-amigaMesaContext context;
 
+
+#ifdef WARPOS
 #pragma pack(pop)
+#endif
 
 #include <GL/amigamesa.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+
+amigaMesaContext context;
 #define WIDTH    300
 #define HEIGHT   200
 
@@ -207,7 +211,9 @@ int main(int argc, char **argv)
 				 WA_DragBar, TRUE,
 				 WA_Activate, TRUE,
 				 TAG_END))) {
-      if ((context = amigaMesaCreateContextTags(AMA_Window, window,
+			printf("Triangles found window ptr: 0x%08x\n",window);
+			printf("Triangles found screen ptr: 0x%08x\n",window->WScreen);
+      if ((context = amigaMesaCreateContextTags( AMA_Window, window,
 						AMA_RastPort, (unsigned long)window->RPort,
 						AMA_Screen, (unsigned long)window->WScreen,
 						AMA_Left, window->BorderLeft,
@@ -216,9 +222,9 @@ int main(int argc, char **argv)
 						AMA_Height, HEIGHT,
 						AMA_RGBMode, GL_TRUE,
 						TAG_END))) {
-	if (window->WScreen->RastPort.BitMap->Depth <= 8)
-	  drawTrianglesIndexModes0(context, argc == 2 ? atoi(argv[1]) : 500);
-	else
+	//if (window->WScreen->RastPort.BitMap->Depth <= 8)
+	 // drawTrianglesIndexModes0(context, argc == 2 ? atoi(argv[1]) : 500);
+	//else
 	  drawTrianglesRGBAModes(context, argc == 2 ? atoi(argv[1]) : 500);
 
 	handle_window_events(window);
