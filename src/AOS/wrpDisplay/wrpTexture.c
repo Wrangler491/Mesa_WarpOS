@@ -22,6 +22,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+static GLint ilog2( GLint n );
+
 typedef struct {
   W3D_Texture *texture;
   void *teximage;
@@ -736,3 +738,16 @@ void wrpTexEnv(GLcontext * ctx, GLenum pname, const GLfloat * param)
 
   W3D_SetTexEnv(TDcontext, NULL, TDdriver->envmode, &TDdriver->envcolor);
 }
+
+/*
+ * Return the largest k such that 2^k <= n.
+ */
+static GLint ilog2( GLint n )
+{
+   GLint k;
+
+   if (n<=0) return 0;
+   for (k=0; n>>=1; k++) ;
+   return k;
+}
+
