@@ -183,19 +183,28 @@ void drawTrianglesRGBAModes(amigaMesaContext context, int num) {
 }
 
 void exitT(void) {
-  if (context)
+  if (context) {
+	printf("Closing context\n");
     amigaMesaDestroyContext(context);
-  if (window)
+	}
+  if (window) {
+	printf("Closing window\n");
     CloseWindow(window);
-  if (screen)
+	}
+  if (screen) {
+	printf("Unlocking screen\n");
     UnlockPubScreen(NULL, screen);
-  if (IntuitionBase)
+	}
+  if (IntuitionBase) {
+	printf("Closing library\n");
     CloseLibrary(IntuitionBase);
+	}
 }
 
 int main(int argc, char **argv)
 {
   atexit(exitT);
+  uint16_t depth;
 
   if ((IntuitionBase = OpenLibrary("intuition.library", 1))) {
     if (!(screen = LockPubScreen("Mesa")))
@@ -222,12 +231,17 @@ int main(int argc, char **argv)
 						AMA_Height, HEIGHT,
 						AMA_RGBMode, GL_TRUE,
 						TAG_END))) {
+	depth = GetBitMapAttr (window->WScreen->RastPort.BitMap, BMA_DEPTH);
+	printf("Screen depth is: %d\n",depth);
 	//if (window->WScreen->RastPort.BitMap->Depth <= 8)
-	 // drawTrianglesIndexModes0(context, argc == 2 ? atoi(argv[1]) : 500);
-	//else
+	if(depth<=8)
+	  drawTrianglesIndexModes0(context, argc == 2 ? atoi(argv[1]) : 500);
+	else
 	  drawTrianglesRGBAModes(context, argc == 2 ? atoi(argv[1]) : 500);
 
+printf("Done\n");
 	handle_window_events(window);
+printf("Clicked close\n");
       }
     }
   }
