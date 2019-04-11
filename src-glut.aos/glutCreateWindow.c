@@ -139,11 +139,13 @@ int glutCreateWindow(const char *title)
 						    AMA_Height, glutstuff.initheight,
 						    TAG_END))) {
 	if (ModifyIDCMP(win, IDCMP_CLOSEWINDOW | IDCMP_VANILLAKEY | IDCMP_RAWKEY | IDCMP_MENUPICK | IDCMP_MOUSEBUTTONS | IDCMP_INTUITICKS | IDCMP_CHANGEWINDOW)) {
+	  DEBUGOUT(11,"CreateWindow step 1\n");
 	  nNewList(&gw->SubWindows);
 	  nNewList(&gw->WindowTimers);
 
 	  win->UserData = (APTR)gw;
 	  gw->vi = GetVisualInfo(win->WScreen, TAG_END);
+	  DEBUGOUT(11,"CreateWindow step 2\n");
 
 	  if ((gw->menu = CreateMenus(defmenu, TAG_END))) {
 	    LayoutMenus(gw->menu, gw->vi, TAG_END);
@@ -169,6 +171,7 @@ int glutCreateWindow(const char *title)
 	  gw->needleftmenu = TRUE;
 	  gw->needmiddlemenu = TRUE;
 	  gw->needrightmenu = TRUE;
+	  DEBUGOUT(11,"CreateWindow step 3\n");
 
 	  stuffLinkInWin(gw);
 	  DEBUGOUT(10, "glutCreateWindow about to call glEnable\n");
