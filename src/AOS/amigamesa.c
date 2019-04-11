@@ -138,6 +138,10 @@ struct Library *CyberGfxBase = NULL;				/*  optional base address for cybergfx  
 struct GfxBase *GfxBase = NULL;
 struct IntuitionBase *IntuitionBase = NULL;
 struct UtilityBase *UtilityBase = NULL;
+#ifdef AOS_WARP3D
+struct Library *Warp3DBase = NULL;
+struct Library *Warp3DPPCBase = NULL;
+#endif
 #pragma pack(pop)
 #endif
 APTR amesaPool = NULL;
@@ -186,6 +190,14 @@ void glConstructor(void)
     printf("Can't open utility.library version 39\n");
     exit(10);
   }
+#ifdef AOS_WARP3D
+  if (!(Warp3DBase = OpenLibrary("libs:warp3d.library", 1))) {
+    DEBUGOUT(1, "Can't open warp3d.library\n");
+  }
+  if (!(Warp3DPPCBase = OpenLibrary("libs:warp3dppc.library", 1))) {
+    DEBUGOUT(1, "Can't open warp3dppc.library\n");
+  }
+#endif
 #ifdef WARPOS
   if (!(amesaPool = CreatePool(MEMF_PUBLIC, 65536, 32768))) {
 #else
@@ -262,6 +274,15 @@ void glDestructor(void)
     CloseLibrary(UtilityBase);
     UtilityBase = 0;
   }
+  if (Warp3DBase) {
+    CloseLibrary(Warp3DBase);
+    Warp3DBase = 0;
+  }
+  if (Warp3DPPCBase) {
+    CloseLibrary(Warp3DPPCBase);
+    Warp3DPPCBase = 0;
+  }
+
   if (amesaPool) {
     DeletePool(amesaPool);
     amesaPool = 0;
@@ -415,19 +436,25 @@ struct amigamesa_visual *amigaMesaCreateVisual(struct TagItem *tagList)
 
   /*
    * RGBMode if no index_bits
-  if (!(v->rgb_flag = index_bits == 0 ? GL_TRUE : GL_FALSE))
-    DEBUGOUT(1, "disable rgbmode\n");
-  else
-    DEBUGOUT(1, "enable rgbmode\n");
    */
+  if (index_bits)
+  {
+	  v->flags &= ~VISUAL_RGBMODE;
+    DEBUGOUT(1, "disable rgbmode\n");
+  } else {
+	  v->flags |= VISUAL_RGBMODE;
+    DEBUGOUT(1, "enable rgbmode\n");
+  }
 
   /*
    * AlphaMode configureable if RGBMode (others make no sence)
    */
 	if(index_bits) {
 		v->flags |= VISUAL_ALPHACHANNEL;
+		DEBUGOUT(1, "enable alphachannel\n");
 	} else {
 		v->flags &= ~VISUAL_ALPHACHANNEL;
+		DEBUGOUT(1, "disable alphachannel\n");
 	}
 /*
   if (!(index_bits == 0 ? v->flags & VISUAL_ALPHACHANNEL : GetTagData(AMA_AlphaFlag, GL_FALSE, tagList)))

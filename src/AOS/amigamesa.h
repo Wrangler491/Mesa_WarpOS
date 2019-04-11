@@ -110,7 +110,7 @@
 #include "vb.h"
 
 #define	AOS_KERNEL
-//#define	AOS_WARP3D
+#define	AOS_WARP3D
 
 /*****************************************************************************
  *
